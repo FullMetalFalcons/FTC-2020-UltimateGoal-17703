@@ -21,15 +21,15 @@ public class BasicDrive extends LinearOpMode {
         m2.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
-        telemetry.addData("Waiting for Start", "");
-        telemetry.update();
-        
         waitForStart();
 
-        telemetry.addData("Start button pressed", "");
+        telemetry.addData("Status", "Initializing");
         telemetry.update();
 
         while (opModeIsActive()) {
+            telemetry.addData("Status", "Running");
+            telemetry.update();
+
             double px = gamepad1.left_stick_x;
             if (Math.abs(px) < 0.05) px = 0;
             double py = -gamepad1.left_stick_y;
