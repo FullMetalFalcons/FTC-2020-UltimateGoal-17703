@@ -37,11 +37,15 @@ public class BasicDrive extends LinearOpMode {
             telemetry.update();
 
             double px = gamepad1.left_stick_x;
-            if (Math.abs(px) < 0.05) px = 0;
+            //px is basically power of x axis
+            if (Math.abs(px) < 0.05) px = 0;  //This is saying if the value of px is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
             double py = -gamepad1.left_stick_y;
-            if (Math.abs(py) < 0.05) py = 0;
+            //py is  the power of the y axis
+            if (Math.abs(py) < 0.05) py = 0;   //This is saying if the value of py is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
             double pa = -gamepad1.right_stick_x;
-            if (Math.abs(pa) < 0.05) pa = 0;
+            //pa is the power of the angle change
+            if (Math.abs(pa) < 0.05) pa = 0;   //This is saying if the value of pa is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
+            //These four p statements are power values of each motor
             double p1 = -px + py - pa;
             double p2 = px + py + -pa;
             double p3 = -px + py + pa;
