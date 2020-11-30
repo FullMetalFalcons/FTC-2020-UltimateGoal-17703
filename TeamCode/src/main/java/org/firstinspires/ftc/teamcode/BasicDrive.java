@@ -11,7 +11,7 @@ public class BasicDrive extends LinearOpMode {
     DcMotor m1, m2, m3, m4;
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
         m1 = hardwareMap.dcMotor.get("back_left_motor");
         m2 = hardwareMap.dcMotor.get("front_left_motor");
@@ -27,6 +27,7 @@ public class BasicDrive extends LinearOpMode {
         telemetry.update();
 
         while (opModeIsActive()) {
+
             telemetry.addData("Status", "Running");
             telemetry.update();
 
