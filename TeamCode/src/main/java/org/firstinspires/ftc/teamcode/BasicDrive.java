@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp (group = "Mech Test", name = "17703")
+@TeleOp (group = "17703", name = "Mech Test")
 public class BasicDrive extends LinearOpMode {
 
     DcMotor m1, m2, m3, m4;
@@ -19,6 +19,11 @@ public class BasicDrive extends LinearOpMode {
         m4 = hardwareMap.dcMotor.get("back_right_motor");
         m1.setDirection(DcMotorSimple.Direction.REVERSE);
         m2.setDirection(DcMotorSimple.Direction.REVERSE);
+        m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //To strafe right, m1 and m3 should be moving back while m2 and m4 should be moving forward
 
 
         waitForStart();
