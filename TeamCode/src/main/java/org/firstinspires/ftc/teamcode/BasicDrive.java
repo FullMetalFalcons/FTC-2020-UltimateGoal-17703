@@ -24,6 +24,11 @@ public class BasicDrive extends LinearOpMode {
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //To strafe right, m1 and m3 should be moving back while m2 and m4 should be moving forward
+        //With the robot, the front wheels are going forward and back going back when strafing to right
+
+        //To move forward left joystick had to go right, and to move back had to go left
+        //To strafe right
+        //To turn right the right joystick goes up, and to turn left the joystick has to go down
 
 
         waitForStart();
