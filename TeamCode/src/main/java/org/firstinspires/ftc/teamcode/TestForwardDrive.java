@@ -17,8 +17,7 @@ public class TestForwardDrive extends LinearOpMode {
         frontRight = hardwareMap.dcMotor.get("front_right_motor");
         backLeft = hardwareMap.dcMotor.get("back_left_motor");
         backRight = hardwareMap.dcMotor.get("back_right_motor");
-        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         telemetry.addData("Status", "Stopped");
         telemetry.update();
@@ -30,7 +29,7 @@ public class TestForwardDrive extends LinearOpMode {
 
         double testPower = 0;
         while (opModeIsActive()) {
-            testPower = -gamepad1.left_stick_y;
+            testPower = gamepad1.left_stick_y;
             telemetry.addData("Status", "Running");
             telemetry.update();
             frontLeft.setPower(testPower);

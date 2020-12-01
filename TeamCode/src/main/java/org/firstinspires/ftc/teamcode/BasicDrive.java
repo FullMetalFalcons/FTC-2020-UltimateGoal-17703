@@ -17,8 +17,6 @@ public class BasicDrive extends LinearOpMode {
         m2 = hardwareMap.dcMotor.get("front_left_motor");
         m3 = hardwareMap.dcMotor.get("front_right_motor");
         m4 = hardwareMap.dcMotor.get("back_right_motor");
-        m1.setDirection(DcMotorSimple.Direction.REVERSE);
-        m2.setDirection(DcMotorSimple.Direction.REVERSE);
         m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -41,13 +39,13 @@ public class BasicDrive extends LinearOpMode {
             telemetry.addData("Status", "Running");
             telemetry.update();
 
-            double powerStrafe = gamepad1.left_stick_x;
+            double powerStrafe = -gamepad1.left_stick_x;
             //px is basically power of x axis
             if (Math.abs(powerStrafe) < 0.05) powerStrafe = 0;  //This is saying if the value of px is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
-            double powerForward = -gamepad1.left_stick_y;
+            double powerForward = gamepad1.left_stick_y;
             //py is  the power of the y axis
             if (Math.abs(powerForward) < 0.05) powerForward = 0;   //This is saying if the value of py is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
-            double powerTurn = -gamepad1.right_stick_x;
+            double powerTurn = gamepad1.right_stick_x;
             //pa is the power of the angle change
             if (Math.abs(powerTurn) < 0.05) powerTurn = 0;   //This is saying if the value of pa is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
             //These four p statements are power values of each motor
