@@ -8,16 +8,17 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 @TeleOp (name = "Test Forward", group = "FMF")
 public class TestForwardDrive extends LinearOpMode {
 
-    DcMotor frontLeft, frontRight, backLeft, backRight;
+    DcMotor m1, m2, m3, m4;
 
     @Override
     public void runOpMode() {
 
-        frontLeft = hardwareMap.dcMotor.get("front_left_motor");
-        frontRight = hardwareMap.dcMotor.get("front_right_motor");
-        backLeft = hardwareMap.dcMotor.get("back_left_motor");
-        backRight = hardwareMap.dcMotor.get("back_right_motor");
-
+        m1 = hardwareMap.dcMotor.get("back_left_motor");
+        m2 = hardwareMap.dcMotor.get("front_left_motor");
+        m3 = hardwareMap.dcMotor.get("front_right_motor");
+        m4 = hardwareMap.dcMotor.get("back_right_motor");
+        m1.setDirection(DcMotorSimple.Direction.REVERSE);
+        m2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         telemetry.addData("Status", "Stopped");
         telemetry.update();
@@ -32,13 +33,11 @@ public class TestForwardDrive extends LinearOpMode {
             testPower = gamepad1.left_stick_y;
             telemetry.addData("Status", "Running");
             telemetry.update();
-            frontLeft.setPower(testPower);
-            frontRight.setPower(testPower);
-            backLeft.setPower(testPower);
-            backRight.setPower(testPower);
-            telemetry.addData("Target Power", testPower);
-            telemetry.addData("Actual Power", String.valueOf(frontLeft.getPower()), frontRight.getPower(), backRight.getPower(), backLeft.getPower());
-            telemetry.update();
+            m1.setPower(testPower);
+            m2.setPower(testPower);
+            m3.setPower(testPower);
+            m4.setPower(testPower);
+
         }
 
     }

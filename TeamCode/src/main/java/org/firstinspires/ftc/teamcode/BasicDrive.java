@@ -20,7 +20,9 @@ public class BasicDrive extends LinearOpMode {
         m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m1.setDirection(DcMotorSimple.Direction.REVERSE);
+        m2.setDirection(DcMotorSimple.Direction.REVERSE);
         //To strafe right, m1 and m3 should be moving back while m2 and m4 should be moving forward
         //With the robot, the front wheels are going forward and back going back when strafing to right
 
@@ -40,15 +42,11 @@ public class BasicDrive extends LinearOpMode {
             telemetry.update();
 
             double powerStrafe = -gamepad1.left_stick_x;
-            //px is basically power of x axis
-            if (Math.abs(powerStrafe) < 0.05) powerStrafe = 0;  //This is saying if the value of px is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
+            if (Math.abs(powerStrafe) < 0.05) powerStrafe = 0;
             double powerForward = gamepad1.left_stick_y;
-            //py is  the power of the y axis
-            if (Math.abs(powerForward) < 0.05) powerForward = 0;   //This is saying if the value of py is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
+            if (Math.abs(powerForward) < 0.05) powerForward = 0;
             double powerTurn = gamepad1.right_stick_x;
-            //pa is the power of the angle change
-            if (Math.abs(powerTurn) < 0.05) powerTurn = 0;   //This is saying if the value of pa is < .05 or > -.05, all while less than 0, it is basically 0 to reduce error
-            //These four p statements are power values of each motor
+            if (Math.abs(powerTurn) < 0.05) powerTurn = 0;
             double p1 = -powerStrafe + powerForward - powerTurn;
             double p2 = powerStrafe + powerForward - powerTurn;
             double p3 = -powerStrafe + powerForward + powerTurn;
