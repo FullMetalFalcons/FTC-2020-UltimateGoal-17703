@@ -31,10 +31,8 @@ public class WobbleTest extends LinearOpMode {
         wobbleMotor = hardwareMap.dcMotor.get("arm_motor");
         //Depending on orientation you may need to change the direction the motor runs
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        wobbleMotor.setTargetPosition(0);
-
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
+        wobbleMotor.setTargetPosition(0);
         wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         wristServo = hardwareMap.servo.get("hand_servo");
