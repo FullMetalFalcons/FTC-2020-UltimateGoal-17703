@@ -74,25 +74,33 @@ public class WobbleTest extends LinearOpMode {
             m3.setPower(p3);
             m4.setPower(p4);
 
-            if (gamepad1.left_bumper) {
+            if (gamepad2.left_bumper) {
                 /*Sets the target position for the encoder to be the wobbleEncoderMax (90 degree turn theoretically)
                 and it will run forward until it reaches that position*/
                 wobbleMotor.setTargetPosition((int) wobbleEncoderMax);
-                wobbleMotor.setPower(.5);
-            } else if (gamepad1.right_bumper) {
+                wobbleMotor.setPower(.25);
+            } else if (gamepad2.right_bumper) {
                 /*Sets the target position for the encoder of the wobble motor to be zero (initial position) and
                 the setPower will mean it reverses until it returns to that position*/
-                wobbleMotor.setTargetPosition(0);
-                wobbleMotor.setPower(-.5);
-            } else if (gamepad1.x) {
+                wobbleMotor.setTargetPosition(50);
+                wobbleMotor.setPower(-.25);
+            } else {
+                wobbleMotor.setPower(0);
+            }
+
+            if (gamepad2.x) {
                 //Closes the wrist
                 wristServo.setPosition(1);
             }
-            else if (gamepad1.b) {
+            else if (gamepad2.b) {
                 //Opens the wrist
                 wristServo.setPosition(0);
-            } else if (gamepad1.y) {
+            }
+
+            if (gamepad2.y) {
                 shooter.setPower(1);
+            } else {
+                shooter.setPower(0);
             }
         }
 
