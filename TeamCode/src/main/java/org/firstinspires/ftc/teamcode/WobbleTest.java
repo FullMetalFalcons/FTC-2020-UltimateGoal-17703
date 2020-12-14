@@ -12,8 +12,6 @@ public class WobbleTest extends LinearOpMode {
     DcMotor m1, m2, m3, m4, wobbleMotor, shooter;
     Servo wristServo;
 
-    private final double wobbleEncoderMax = .25*1120;
-
     @Override
     public void runOpMode() {
 
@@ -29,9 +27,8 @@ public class WobbleTest extends LinearOpMode {
         m2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         wobbleMotor = hardwareMap.dcMotor.get("arm_motor");
-        //Depending on orientation you may need to change the direction the motor runs
-        wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
+        wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         wobbleMotor.setTargetPosition(0);
         wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -77,24 +74,27 @@ public class WobbleTest extends LinearOpMode {
             if (gamepad2.left_bumper) {
                 /*Sets the target position for the encoder to be the wobbleEncoderMax (90 degree turn theoretically)
                 and it will run forward until it reaches that position*/
-                wobbleMotor.setTargetPosition((int) wobbleEncoderMax);
-                wobbleMotor.setPower(.25);
+                wobbleMotor.setTargetPosition(-40);
+                wobbleMotor.setPower(.10);
             } else if (gamepad2.right_bumper) {
                 /*Sets the target position for the encoder of the wobble motor to be zero (initial position) and
                 the setPower will mean it reverses until it returns to that position*/
-                wobbleMotor.setTargetPosition(50);
-                wobbleMotor.setPower(-.25);
+                wobbleMotor.setTargetPosition(200);
+                wobbleMotor.setPower(-.10);
+            } else if (gamepad2.a) {
+                wobbleMotor.setTargetPosition(300);
+                wobbleMotor.setPower(-.1);
             } else {
                 wobbleMotor.setPower(0);
             }
 
             if (gamepad2.x) {
-                //Closes the wrist
+                //Opens the wrist
                 wristServo.setPosition(1);
             }
             else if (gamepad2.b) {
-                //Opens the wrist
-                wristServo.setPosition(0);
+                //Closes the wrist
+                wristServo.setPosition(.3);
             }
 
             if (gamepad2.y) {
