@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -29,18 +30,21 @@ public class WobbleTest extends LinearOpMode {
         wobbleMotor = hardwareMap.dcMotor.get("arm_motor");
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wobbleMotor.setTargetPosition(0);
         wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         wristServo = hardwareMap.servo.get("hand_servo");
 
         shooter = hardwareMap.dcMotor.get("shooter_motor");
+        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
         waitForStart();
 
         telemetry.addData("Status", "Initializing");
         telemetry.update();
+
 
         while (opModeIsActive()) {
 
@@ -74,15 +78,15 @@ public class WobbleTest extends LinearOpMode {
             if (gamepad2.left_bumper) {
                 /*Sets the target position for the encoder to be the wobbleEncoderMax (90 degree turn theoretically)
                 and it will run forward until it reaches that position*/
-                wobbleMotor.setTargetPosition(-40);
+                wobbleMotor.setTargetPosition(-400);
                 wobbleMotor.setPower(.10);
             } else if (gamepad2.right_bumper) {
                 /*Sets the target position for the encoder of the wobble motor to be zero (initial position) and
                 the setPower will mean it reverses until it returns to that position*/
-                wobbleMotor.setTargetPosition(200);
+                wobbleMotor.setTargetPosition(-100);
                 wobbleMotor.setPower(-.10);
             } else if (gamepad2.a) {
-                wobbleMotor.setTargetPosition(300);
+                wobbleMotor.setTargetPosition(-50);
                 wobbleMotor.setPower(-.1);
             } else {
                 wobbleMotor.setPower(0);
@@ -91,18 +95,17 @@ public class WobbleTest extends LinearOpMode {
             if (gamepad2.x) {
                 //Opens the wrist
                 wristServo.setPosition(1);
-            }
-            else if (gamepad2.b) {
+            } else if (gamepad2.b) {
                 //Closes the wrist
                 wristServo.setPosition(.3);
             }
 
             if (gamepad2.y) {
-                shooter.setPower(1);
+                shooter.setPower(.9);
+                //Create a setVelocity function once you have details about the shooter rpm
             } else {
                 shooter.setPower(0);
             }
         }
-
     }
 }

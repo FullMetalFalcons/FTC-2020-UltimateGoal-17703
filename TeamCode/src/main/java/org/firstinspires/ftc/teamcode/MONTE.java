@@ -4,11 +4,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp (name = "MONTE", group = "17703")
 public class MONTE extends LinearOpMode {
 
-    DcMotor frontLeft, frontRight, backLeft, backRight, intake, shooter;
+    DcMotor frontLeft, frontRight, backLeft, backRight, intake, shooter, wobbleMotor;
+    Servo wristServo;
 
     @Override
     public void runOpMode() {
@@ -22,6 +24,13 @@ public class MONTE extends LinearOpMode {
         intake = hardwareMap.dcMotor.get("intake_motor");
         shooter = hardwareMap.dcMotor.get("shooter_motor");
 
+        wobbleMotor = hardwareMap.dcMotor.get("arm_motor");
+
+
+        wobbleMotor.setTargetPosition(0);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        wristServo = hardwareMap.servo.get("hand_servo");
 
     }
 }

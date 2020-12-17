@@ -11,11 +11,16 @@ public class ShooterOnly extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        shooter = hardwareMap.dcMotor.get("shooter_motor");
-        if (gamepad1.y) {
-            shooter.setPower(1);
-        } else {
-            shooter.setPower(0);
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+            shooter = hardwareMap.dcMotor.get("shooter_motor");
+            if (gamepad1.y) {
+                shooter.setPower(1);
+            } else {
+                shooter.setPower(0);
+            }
         }
     }
 }
