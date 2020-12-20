@@ -10,8 +10,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp (group = "17703", name = "Shooter and Wobble Test")
 public class WobbleTest extends LinearOpMode {
 
-    DcMotor m1, m2, m3, m4, wobbleMotor, shooter;
+    DcMotor m1, m2, m3, m4;
     Servo wristServo;
+    DcMotorEx wobbleMotor, shooter;
 
     @Override
     public void runOpMode() {
@@ -27,7 +28,7 @@ public class WobbleTest extends LinearOpMode {
         m1.setDirection(DcMotorSimple.Direction.REVERSE);
         m2.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        wobbleMotor = hardwareMap.dcMotor.get("arm_motor");
+        wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -36,7 +37,7 @@ public class WobbleTest extends LinearOpMode {
 
         wristServo = hardwareMap.servo.get("hand_servo");
 
-        shooter = hardwareMap.dcMotor.get("shooter_motor");
+        shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
@@ -101,8 +102,9 @@ public class WobbleTest extends LinearOpMode {
             }
 
             if (gamepad2.y) {
-                shooter.setPower(.9);
-                //Create a setVelocity function once you have details about the shooter rpm
+                shooter.setPower(1);
+                telemetry.addData("Current Velocity", shooter.getVelocity());
+                telemetry.update();
             } else {
                 shooter.setPower(0);
             }
