@@ -31,9 +31,7 @@ public class WobbleTest extends LinearOpMode {
         wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wobbleMotor.setTargetPosition(0);
-        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         wristServo = hardwareMap.servo.get("hand_servo");
 
@@ -77,18 +75,9 @@ public class WobbleTest extends LinearOpMode {
             m4.setPower(p4);
 
             if (gamepad2.left_bumper) {
-                /*Sets the target position for the encoder to be the wobbleEncoderMax (90 degree turn theoretically)
-                and it will run forward until it reaches that position*/
-                wobbleMotor.setTargetPosition(-400);
-                wobbleMotor.setPower(.10);
+                wobbleMotor.setPower(.30);
             } else if (gamepad2.right_bumper) {
-                /*Sets the target position for the encoder of the wobble motor to be zero (initial position) and
-                the setPower will mean it reverses until it returns to that position*/
-                wobbleMotor.setTargetPosition(-100);
-                wobbleMotor.setPower(-.10);
-            } else if (gamepad2.a) {
-                wobbleMotor.setTargetPosition(-50);
-                wobbleMotor.setPower(-.1);
+                wobbleMotor.setPower(-.30);
             } else {
                 wobbleMotor.setPower(0);
             }

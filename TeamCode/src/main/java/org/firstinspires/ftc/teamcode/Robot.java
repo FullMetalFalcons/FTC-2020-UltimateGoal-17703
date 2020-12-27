@@ -12,7 +12,8 @@ public class Robot extends LinearOpMode {
 
     DcMotor m1, m2, m3, m4;
     Servo wristServo;
-    DcMotorEx wobbleMotor, shooter;
+    DcMotorEx wobbleMotor, shooter, hopper;
+    private final double SHOOTER_MAX_VELOCITY = 2180;
 
     @Override
     public void runOpMode() {
@@ -31,15 +32,15 @@ public class Robot extends LinearOpMode {
         wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wobbleMotor.setTargetPosition(0);
-        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         wristServo = hardwareMap.servo.get("hand_servo");
 
         shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
 
         waitForStart();
 
@@ -50,6 +51,7 @@ public class Robot extends LinearOpMode {
         while (opModeIsActive()) {
 
             telemetry.addData("Status", "Running");
+            telemetry.addData("Shooter Velocity", shooter.getVelocity());
             telemetry.update();
 
 
@@ -77,18 +79,9 @@ public class Robot extends LinearOpMode {
             m4.setPower(p4);
 
             if (gamepad2.left_bumper) {
-                /*Sets the target position for the encoder to be the wobbleEncoderMax (90 degree turn theoretically)
-                and it will run forward until it reaches that position*/
-                wobbleMotor.setTargetPosition(-400);
-                wobbleMotor.setPower(.10);
+                wobbleMotor.setPower(-.30);
             } else if (gamepad2.right_bumper) {
-                /*Sets the target position for the encoder of the wobble motor to be zero (initial position) and
-                the setPower will mean it reverses until it returns to that position*/
-                wobbleMotor.setTargetPosition(-100);
-                wobbleMotor.setPower(-.10);
-            } else if (gamepad2.a) {
-                wobbleMotor.setTargetPosition(-50);
-                wobbleMotor.setPower(-.1);
+                wobbleMotor.setPower(.30);
             } else {
                 wobbleMotor.setPower(0);
             }
@@ -101,12 +94,16 @@ public class Robot extends LinearOpMode {
                 wristServo.setPosition(.3);
             }
 
-            if (gamepad2.y) {
-                shooter.setPower(1);
-                telemetry.addData("Current Velocity", shooter.getVelocity());
-                telemetry.update();
+            if (gamepad2.right_trigger > .05) {
+                shooter.setVelocity(1750);
             } else {
                 shooter.setPower(0);
+            }
+
+            if (gamepad2.left_trigger > .05) {
+                hopper.setPower(1);
+            } else {
+                hopper.setPower(0);
             }
         }
     }

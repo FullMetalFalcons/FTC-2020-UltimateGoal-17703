@@ -181,12 +181,13 @@ public class VisionTest extends LinearOpMode {
          */
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
+        //Sets the camera name
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
         parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam");
 
         //  Instantiate the Vuforia engine
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
         // Loading trackables is not necessary for the TensorFlow Object Detection engine.
     }
 
