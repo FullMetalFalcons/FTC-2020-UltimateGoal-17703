@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -43,22 +46,6 @@ import java.util.List;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-        import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-        import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-        import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import java.util.List;
-        import org.firstinspires.ftc.robotcore.external.ClassFactory;
-        import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-        import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-        import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-        import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-
 /**
  * This 2020-2021 OpMode illustrates the basics of using the TensorFlow Object Detection API to
  * determine the position of the Ultimate Goal game elements.
@@ -69,19 +56,21 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@Autonomous(name = "TensorFlow Object Detection Webcam", group = "17703")
+@Autonomous(name = "Webcam Test", group = "17703")
 //@Disabled
-public class VisionTest extends LinearOpMode {
+public class VisionAuto extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
 
+    int stackGenerator;
+
     private final double ENCODER_TICKS_PER_REVOLUTION = 1120;
-    private final double ENCODER_TICKS_PER_TILE = 2130;
-    private final double ENCODER_90_TURN_LEFT = -2103;
-    private final double ENCODER_90_TURN_RIGHT = 2104;
-    private final double ENCODER_STRAFE_LEFT = -2080;
-    private final double ENCODER_STRAFE_RIGHT = 2080;
+    private final int ENCODER_TICKS_PER_TILE = -2130;
+    private final double ENCODER_90_TURN_LEFT = 2103;
+    private final double ENCODER_90_TURN_RIGHT = -2104;
+    private final double ENCODER_STRAFE_LEFT = 2080;
+    private final double ENCODER_STRAFE_RIGHT = -2080;
 
     DcMotor m1, m2, m3, m4;
     Servo wristServo;
@@ -116,33 +105,6 @@ public class VisionTest extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-        m1 = hardwareMap.dcMotor.get("back_left_motor");
-        m2 = hardwareMap.dcMotor.get("front_left_motor");
-        m3 = hardwareMap.dcMotor.get("front_right_motor");
-        m4 = hardwareMap.dcMotor.get("back_right_motor");
-        m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m1.setDirection(DcMotorSimple.Direction.REVERSE);
-        m2.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
-        //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
-        wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        wristServo = hardwareMap.servo.get("hand_servo");
-
-        shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
-        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
-
-        intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
-
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
         initVuforia();
@@ -166,6 +128,38 @@ public class VisionTest extends LinearOpMode {
             //tfod.setZoom(2.5, 1.78);
         }
 
+        m1 = hardwareMap.dcMotor.get("back_left_motor");
+        m2 = hardwareMap.dcMotor.get("front_left_motor");
+        m3 = hardwareMap.dcMotor.get("front_right_motor");
+        m4 = hardwareMap.dcMotor.get("back_right_motor");
+        m1.setTargetPosition(0);
+        m2.setTargetPosition(0);
+        m3.setTargetPosition(0);
+        m4.setTargetPosition(0);
+        m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m1.setDirection(DcMotorSimple.Direction.REVERSE);
+        m2.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
+        //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
+        wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+        wristServo = hardwareMap.servo.get("hand_servo");
+
+        shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
+        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
+
+        intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
@@ -173,11 +167,25 @@ public class VisionTest extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            moveForward();
-            sleep(300);
-            strafeLeft();
-            sleep(700);
+            m1.setTargetPosition(-400);
+            m2.setTargetPosition(-400);
+            m3.setTargetPosition(-400);
+            m4.setTargetPosition(-400);
+            while (m1.getCurrentPosition() >= m1.getTargetPosition()) {
+                moveForward();
+            }
             stopBot();
+            sleep(100);
+            resetEnc();
+            m1.setTargetPosition(-700);
+            m2.setTargetPosition(700);
+            m3.setTargetPosition(-700);
+            m4.setTargetPosition(700);
+            while ((m1.getCurrentPosition() >= m1.getTargetPosition()) && m2.getCurrentPosition() <= m2.getTargetPosition()) {
+                strafeLeft();
+            }
+            stopBot();
+            sleep(200);
 
             while (opModeIsActive()) {
                 if (tfod != null) {
@@ -186,10 +194,12 @@ public class VisionTest extends LinearOpMode {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
-                        if (updatedRecognitions.size() == 0 ) {
+                        if (updatedRecognitions.size() == 0) {
                             // empty list.  no objects recognized.
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
+                            stackGenerator = 0;
+                            telemetry.addData("Stack Variable Value", stackGenerator);
                         } else {
                             // list is not empty.
                             // step through the list of recognitions and display boundary info.
@@ -204,19 +214,74 @@ public class VisionTest extends LinearOpMode {
                                 // check label to see which target zone to go after.
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
+                                    stackGenerator = 1;
+                                    telemetry.addData("Stack Variable Value", stackGenerator);
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
+                                    stackGenerator = 2;
+                                    telemetry.addData("Stack Variable Value", stackGenerator);
+                                    m1.setTargetPosition(-1000);
+                                    m2.setTargetPosition(-1000);
+                                    m3.setTargetPosition(-1000);
+                                    m4.setTargetPosition(-1000);
+                                    while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                                        moveForward();
+                                    }
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
                                 }
+                                stopBot();
                             }
-                        }
 
+                        }
                         telemetry.update();
                     }
                 }
             }
-        }
+
+
+
+            /*if (stackGenerator == 0) {
+                while (m2.getCurrentPosition() <= ENCODER_STRAFE_LEFT + 100) {
+                    strafeLeft();
+                }
+                resetEnc();
+                while (m2.getCurrentPosition() >= 1.8 * ENCODER_TICKS_PER_TILE) {
+                    moveForward();
+                }
+                stopBot();
+            }
+
+            //Code for B Square
+            if (stackGenerator == 1) {
+                while (m2.getCurrentPosition() >= (ENCODER_STRAFE_RIGHT / 2) + 100) {
+                    strafeRight();
+                }
+                resetEnc();
+                while (m2.getCurrentPosition() >= 2.8 * ENCODER_TICKS_PER_TILE) {
+                    moveForward();
+                }
+                resetEnc();
+                while (m2.getCurrentPosition() <= ENCODER_STRAFE_LEFT / 2) {
+                    strafeLeft();
+                }
+                stopBot();
+            }
+
+            //Code for C Square
+            if (stackGenerator == 2) {
+                while (m2.getCurrentPosition() <= ENCODER_STRAFE_LEFT + 100) {
+                    strafeLeft();
+                }
+                resetEnc();
+                while (m2.getCurrentPosition() >= 3.8 * ENCODER_TICKS_PER_TILE) {
+                    moveForward();
+                }
+                stopBot();
+            }*/
+            }
+
+
 
         if (tfod != null) {
             tfod.shutdown();
@@ -254,7 +319,6 @@ public class VisionTest extends LinearOpMode {
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
     }
 
-
     void setPower(float powerStrafe, float powerForward, float powerTurn){
         double p1 = -powerStrafe + powerForward - powerTurn;
         double p2 = powerStrafe + powerForward - powerTurn;
@@ -274,14 +338,11 @@ public class VisionTest extends LinearOpMode {
         m4.setPower(p4);
     }
 
-    private void moveForward() {
-        setPower(0, -.5f, 0);
+    void stopBot() {
+        setPower(0, 0, 0);
     }
-    private void stopBot() {
-        m1.setPower(0);
-        m2.setPower(0);
-        m3.setPower(0);
-        m4.setPower(0);
+    void moveForward() {
+        setPower(0, -.5f, 0);
     }
     void moveBackward() {
         setPower(0, .5f, 0);
@@ -298,4 +359,15 @@ public class VisionTest extends LinearOpMode {
     void turnRight() {
         setPower(0, 0, -.5f);
     }
+    public void resetEnc() {
+        m1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
 }
+

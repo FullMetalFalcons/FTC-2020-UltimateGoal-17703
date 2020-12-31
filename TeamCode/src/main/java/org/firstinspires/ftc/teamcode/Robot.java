@@ -12,7 +12,7 @@ public class Robot extends LinearOpMode {
 
     DcMotor m1, m2, m3, m4;
     Servo wristServo;
-    DcMotorEx wobbleMotor, shooter, hopper;
+    DcMotorEx wobbleMotor, shooter, hopper, intake;
     private final double SHOOTER_MAX_VELOCITY = 2180;
 
     @Override
@@ -41,6 +41,9 @@ public class Robot extends LinearOpMode {
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
         hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
+
+        intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
 
@@ -102,8 +105,10 @@ public class Robot extends LinearOpMode {
 
             if (gamepad2.left_trigger > .05) {
                 hopper.setPower(1);
+                intake.setPower(1);
             } else {
                 hopper.setPower(0);
+                intake.setPower(0);
             }
         }
     }

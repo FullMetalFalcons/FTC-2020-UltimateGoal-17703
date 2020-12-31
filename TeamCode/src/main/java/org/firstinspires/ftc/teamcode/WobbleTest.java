@@ -12,7 +12,7 @@ public class WobbleTest extends LinearOpMode {
 
     DcMotor m1, m2, m3, m4;
     Servo wristServo;
-    DcMotorEx wobbleMotor, shooter;
+    DcMotorEx wobbleMotor, shooter, intake;
 
     @Override
     public void runOpMode() {
@@ -37,6 +37,9 @@ public class WobbleTest extends LinearOpMode {
 
         shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
         waitForStart();
