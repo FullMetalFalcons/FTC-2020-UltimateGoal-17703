@@ -28,6 +28,10 @@ public class TestAuto extends LinearOpMode {
         m2.setTargetPosition(0);
         m3.setTargetPosition(0);
         m4.setTargetPosition(0);
+        m1.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        m2.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        m3.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        m4.setMode(DcMotor.RunMode.RESET_ENCODERS);
         m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -55,21 +59,24 @@ public class TestAuto extends LinearOpMode {
         telemetry.addData("Status", "Initializing");
         telemetry.update();
 
-        if (opModeIsActive()) {
+        while (opModeIsActive()) {
 
            telemetry.addData("Status", "Running");
-           telemetry.addData("Encoders", m1.getCurrentPosition());
+           telemetry.addData("Initial Encoder Ticks", m1.getCurrentPosition());
            telemetry.update();
 
-            m1.setTargetPosition(-1000);
-            m2.setTargetPosition(-1000);
-            m3.setTargetPosition(-1000);
-            m4.setTargetPosition(-1000);
-           while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+           //645 worked at first
+            m1.setTargetPosition(-500);
+            m2.setTargetPosition(-500);
+            m3.setTargetPosition(-500);
+            m4.setTargetPosition(-500);
+           while (m3.getCurrentPosition() > m3.getTargetPosition() && m2.getCurrentPosition() > m1.getTargetPosition()) {
                moveForward();
            }
+           stopBot();
 
-
+           telemetry.addData("Final Encoder Ticks", m1.getCurrentPosition());
+           telemetry.update();
 
         }
 

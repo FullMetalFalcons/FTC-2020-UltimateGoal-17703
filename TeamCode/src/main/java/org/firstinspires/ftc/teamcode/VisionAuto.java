@@ -66,13 +66,13 @@ public class VisionAuto extends LinearOpMode {
     int stackGenerator;
 
     private final double ENCODER_TICKS_PER_REVOLUTION = 1120;
-    private final int ENCODER_TICKS_PER_TILE = -2130;
+    private final int ENCODER_TICKS_PER_TILE = -500;
     private final double ENCODER_90_TURN_LEFT = 2103;
     private final double ENCODER_90_TURN_RIGHT = -2104;
     private final double ENCODER_STRAFE_LEFT = 2080;
     private final double ENCODER_STRAFE_RIGHT = -2080;
 
-    DcMotor m1, m2, m3, m4;
+    DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
     Servo wristServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
 
@@ -128,20 +128,20 @@ public class VisionAuto extends LinearOpMode {
             //tfod.setZoom(2.5, 1.78);
         }
 
-        m1 = hardwareMap.dcMotor.get("back_left_motor");
-        m2 = hardwareMap.dcMotor.get("front_left_motor");
-        m3 = hardwareMap.dcMotor.get("front_right_motor");
-        m4 = hardwareMap.dcMotor.get("back_right_motor");
-        m1.setTargetPosition(0);
-        m2.setTargetPosition(0);
-        m3.setTargetPosition(0);
-        m4.setTargetPosition(0);
-        m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        m1.setDirection(DcMotorSimple.Direction.REVERSE);
-        m2.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor = hardwareMap.dcMotor.get("back_left_motor");
+        frontLeftMotor = hardwareMap.dcMotor.get("front_left_motor");
+        frontRightMotor = hardwareMap.dcMotor.get("front_right_motor");
+        backRightMotor = hardwareMap.dcMotor.get("back_right_motor");
+        backLeftMotor.setTargetPosition(0);
+        frontLeftMotor.setTargetPosition(0);
+        frontRightMotor.setTargetPosition(0);
+        backRightMotor.setTargetPosition(0);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
@@ -167,21 +167,21 @@ public class VisionAuto extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            m1.setTargetPosition(-400);
-            m2.setTargetPosition(-400);
-            m3.setTargetPosition(-400);
-            m4.setTargetPosition(-400);
-            while (m1.getCurrentPosition() >= m1.getTargetPosition()) {
+            backLeftMotor.setTargetPosition(-500);
+            frontLeftMotor.setTargetPosition(-500);
+            frontRightMotor.setTargetPosition(-500);
+            backRightMotor.setTargetPosition(-500);
+            while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() >= frontLeftMotor.getTargetPosition())) {
                 moveForward();
             }
             stopBot();
             sleep(100);
             resetEnc();
-            m1.setTargetPosition(-700);
-            m2.setTargetPosition(700);
-            m3.setTargetPosition(-700);
-            m4.setTargetPosition(700);
-            while ((m1.getCurrentPosition() >= m1.getTargetPosition()) && m2.getCurrentPosition() <= m2.getTargetPosition()) {
+            backLeftMotor.setTargetPosition(-700);
+            frontLeftMotor.setTargetPosition(700);
+            frontRightMotor.setTargetPosition(-700);
+            backRightMotor.setTargetPosition(700);
+            while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() <= frontLeftMotor.getTargetPosition())) {
                 strafeLeft();
             }
             stopBot();
@@ -200,7 +200,27 @@ public class VisionAuto extends LinearOpMode {
                             telemetry.addData("Target Zone", "A");
                             stackGenerator = 0;
                             telemetry.addData("Stack Variable Value", stackGenerator);
-                        } else {
+                            //code for strafe
+
+                            backLeftMotor.setTargetPosition(-500);
+                            frontLeftMotor.setTargetPosition(500);
+                            frontRightMotor.setTargetPosition(-500);
+                            backRightMotor.setTargetPosition(500);
+                            while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() <= frontLeftMotor.getTargetPosition())) {
+                                strafeLeft();
+                            }
+                            resetEnc();
+                            //Code for forward to A zone
+                            backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*2);
+                            frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*2);
+                            frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*2);
+                            backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*2);
+                            while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() <= frontLeftMotor.getTargetPosition())) {
+                                moveForward();
+                            }
+                            stopBot();
+
+                        } else{
                             // list is not empty.
                             // step through the list of recognitions and display boundary info.
                             int i = 0;
@@ -212,25 +232,69 @@ public class VisionAuto extends LinearOpMode {
                                         recognition.getRight(), recognition.getBottom());
 
                                 // check label to see which target zone to go after.
+
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
                                     stackGenerator = 1;
                                     telemetry.addData("Stack Variable Value", stackGenerator);
-                                } else if (recognition.getLabel().equals("Quad")) {
+                                    //code for strafe
+                                    backLeftMotor.setTargetPosition(1000);
+                                    frontLeftMotor.setTargetPosition(-1000);
+                                    frontRightMotor.setTargetPosition(1000);
+                                    backRightMotor.setTargetPosition(-1000);
+                                    while ((frontRightMotor.getCurrentPosition() <= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() >= frontLeftMotor.getTargetPosition())) {
+                                        strafeRight();
+                                    }
+                                    resetEnc();
+                                    //Code for forward to B zone
+                                    backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*3);
+                                    frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*3);
+                                    frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*3);
+                                    backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*3);
+                                    while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() >= frontLeftMotor.getTargetPosition())) {
+                                        moveForward();
+                                    }
+                                    stopBot();
+
+
+                                }
+
+                                //This is the code for a stack of 4
+                                else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
                                     stackGenerator = 2;
                                     telemetry.addData("Stack Variable Value", stackGenerator);
-                                    m1.setTargetPosition(-1000);
-                                    m2.setTargetPosition(-1000);
-                                    m3.setTargetPosition(-1000);
-                                    m4.setTargetPosition(-1000);
-                                    while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                                    //code for strafe
+                                    strafeLeft();
+                                    sleep(500);
+                                    moveForward();
+                                    sleep(1500);
+                                    stopBot();
+                                  /*  backLeftMotor.setTargetPosition(-500);
+                                    frontLeftMotor.setTargetPosition(500);
+                                    frontRightMotor.setTargetPosition(-500);
+                                    backRightMotor.setTargetPosition(500);
+                                    while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() <= frontLeftMotor.getTargetPosition())) {
+                                        strafeLeft();
+                                    }
+                                    resetEnc();
+                                    //Code for forward to C zone
+                                    backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*4);
+                                    frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*4);
+                                    frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*4);
+                                    backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*4);
+                                    while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() >= frontLeftMotor.getTargetPosition())) {
                                         moveForward();
                                     }
+                                    stopBot();
+                                    */
+
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
                                 }
                                 stopBot();
+
+
                             }
 
                         }
@@ -242,11 +306,11 @@ public class VisionAuto extends LinearOpMode {
 
 
             /*if (stackGenerator == 0) {
-                while (m2.getCurrentPosition() <= ENCODER_STRAFE_LEFT + 100) {
+                while (frontLeftMotor.getCurrentPosition() <= ENCODER_STRAFE_LEFT + 100) {
                     strafeLeft();
                 }
                 resetEnc();
-                while (m2.getCurrentPosition() >= 1.8 * ENCODER_TICKS_PER_TILE) {
+                while (frontLeftMotor.getCurrentPosition() >= 1.8 * ENCODER_TICKS_PER_TILE) {
                     moveForward();
                 }
                 stopBot();
@@ -254,15 +318,15 @@ public class VisionAuto extends LinearOpMode {
 
             //Code for B Square
             if (stackGenerator == 1) {
-                while (m2.getCurrentPosition() >= (ENCODER_STRAFE_RIGHT / 2) + 100) {
+                while (frontLeftMotor.getCurrentPosition() >= (ENCODER_STRAFE_RIGHT / 2) + 100) {
                     strafeRight();
                 }
                 resetEnc();
-                while (m2.getCurrentPosition() >= 2.8 * ENCODER_TICKS_PER_TILE) {
+                while (frontLeftMotor.getCurrentPosition() >= 2.8 * ENCODER_TICKS_PER_TILE) {
                     moveForward();
                 }
                 resetEnc();
-                while (m2.getCurrentPosition() <= ENCODER_STRAFE_LEFT / 2) {
+                while (frontLeftMotor.getCurrentPosition() <= ENCODER_STRAFE_LEFT / 2) {
                     strafeLeft();
                 }
                 stopBot();
@@ -270,11 +334,11 @@ public class VisionAuto extends LinearOpMode {
 
             //Code for C Square
             if (stackGenerator == 2) {
-                while (m2.getCurrentPosition() <= ENCODER_STRAFE_LEFT + 100) {
+                while (frontLeftMotor.getCurrentPosition() <= ENCODER_STRAFE_LEFT + 100) {
                     strafeLeft();
                 }
                 resetEnc();
-                while (m2.getCurrentPosition() >= 3.8 * ENCODER_TICKS_PER_TILE) {
+                while (frontLeftMotor.getCurrentPosition() >= 3.8 * ENCODER_TICKS_PER_TILE) {
                     moveForward();
                 }
                 stopBot();
@@ -332,10 +396,10 @@ public class VisionAuto extends LinearOpMode {
         p2 /= max;
         p3 /= max;
         p4 /= max;
-        m1.setPower(p1);
-        m2.setPower(p2);
-        m3.setPower(p3);
-        m4.setPower(p4);
+        backLeftMotor.setPower(p1);
+        frontLeftMotor.setPower(p2);
+        frontRightMotor.setPower(p3);
+        backRightMotor.setPower(p4);
     }
 
     void stopBot() {
@@ -360,14 +424,14 @@ public class VisionAuto extends LinearOpMode {
         setPower(0, 0, -.5f);
     }
     public void resetEnc() {
-        m1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        m2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        m3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        m4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 }
 

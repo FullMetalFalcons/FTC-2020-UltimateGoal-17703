@@ -176,8 +176,11 @@ public class VisionTest extends LinearOpMode {
             moveForward();
             sleep(300);
             strafeLeft();
-            sleep(700);
+            sleep(750);
             stopBot();
+            sleep(200);
+
+
 
             while (opModeIsActive()) {
                 if (tfod != null) {
@@ -204,8 +207,14 @@ public class VisionTest extends LinearOpMode {
                                 // check label to see which target zone to go after.
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
+
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
+                                    strafeLeft();
+                                    sleep(300);
+                                    moveForward();
+                                    sleep(2000);
+                                    stopBot();
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
                                 }
@@ -213,13 +222,14 @@ public class VisionTest extends LinearOpMode {
                         }
 
                         telemetry.update();
+
                     }
                 }
             }
         }
-
         if (tfod != null) {
             tfod.shutdown();
+            stopBot();
         }
     }
 

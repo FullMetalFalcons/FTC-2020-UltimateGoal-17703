@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp (group = "17703", name = "Basic Robot")
 public class Robot extends LinearOpMode {
 
-    DcMotor m1, m2, m3, m4;
+    DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
     Servo wristServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
     private final double SHOOTER_MAX_VELOCITY = 2180;
@@ -18,16 +18,12 @@ public class Robot extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        m1 = hardwareMap.dcMotor.get("back_left_motor");
-        m2 = hardwareMap.dcMotor.get("front_left_motor");
-        m3 = hardwareMap.dcMotor.get("front_right_motor");
-        m4 = hardwareMap.dcMotor.get("back_right_motor");
-        m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m1.setDirection(DcMotorSimple.Direction.REVERSE);
-        m2.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor = hardwareMap.dcMotor.get("back_left_motor");
+        frontLeftMotor = hardwareMap.dcMotor.get("front_left_motor");
+        frontRightMotor = hardwareMap.dcMotor.get("front_right_motor");
+        backRightMotor = hardwareMap.dcMotor.get("back_right_motor");
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
@@ -76,10 +72,10 @@ public class Robot extends LinearOpMode {
             p2 /= max;
             p3 /= max;
             p4 /= max;
-            m1.setPower(p1);
-            m2.setPower(p2);
-            m3.setPower(p3);
-            m4.setPower(p4);
+            backLeftMotor.setPower(p1*.8);
+            frontLeftMotor.setPower(p2*.8);
+            frontRightMotor.setPower(p3*.8);
+            backRightMotor.setPower(p4*.8);
 
             if (gamepad2.left_bumper) {
                 wobbleMotor.setPower(-.30);
@@ -97,7 +93,7 @@ public class Robot extends LinearOpMode {
                 wristServo.setPosition(.3);
             }
 
-            if (gamepad2.right_trigger > .05) {
+            if (gamepad2.y) {
                 shooter.setVelocity(1750);
             } else {
                 shooter.setPower(0);
@@ -105,9 +101,13 @@ public class Robot extends LinearOpMode {
 
             if (gamepad2.left_trigger > .05) {
                 hopper.setPower(1);
-                intake.setPower(1);
             } else {
                 hopper.setPower(0);
+            }
+
+            if (gamepad2.right_trigger > .05) {
+                intake.setPower(1);
+            } else {
                 intake.setPower(0);
             }
         }
