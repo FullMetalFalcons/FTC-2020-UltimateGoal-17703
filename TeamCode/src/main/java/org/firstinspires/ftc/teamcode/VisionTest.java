@@ -176,7 +176,7 @@ public class VisionTest extends LinearOpMode {
             moveForward();
             sleep(300);
             strafeLeft();
-            sleep(750);
+            sleep(700);
             stopBot();
             sleep(200);
 
@@ -193,6 +193,11 @@ public class VisionTest extends LinearOpMode {
                             // empty list.  no objects recognized.
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
+                            strafeLeft();
+                            sleep(300);
+                            moveForward();
+                            sleep(1000);
+                            stopBot();
                         } else {
                             // list is not empty.
                             // step through the list of recognitions and display boundary info.
@@ -207,13 +212,18 @@ public class VisionTest extends LinearOpMode {
                                 // check label to see which target zone to go after.
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
+                                    strafeRight();
+                                    sleep(1000);
+                                    moveForward();
+                                    sleep(1300);
+                                    stopBot();
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
                                     strafeLeft();
                                     sleep(300);
                                     moveForward();
-                                    sleep(2000);
+                                    sleep(1800);
                                     stopBot();
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
@@ -285,7 +295,7 @@ public class VisionTest extends LinearOpMode {
     }
 
     private void moveForward() {
-        setPower(0, -.5f, 0);
+        setPower(0, -.25f, 0);
     }
     private void stopBot() {
         m1.setPower(0);
@@ -294,18 +304,18 @@ public class VisionTest extends LinearOpMode {
         m4.setPower(0);
     }
     void moveBackward() {
-        setPower(0, .5f, 0);
+        setPower(0, .25f, 0);
     }
     void strafeLeft() {
-        setPower(.5f, 0, 0);
+        setPower(.25f, 0, 0);
     }
     void strafeRight() {
-        setPower(-.5f, 0, 0);
+        setPower(-.25f, 0, 0);
     }
     void turnLeft() {
-        setPower(0, 0, .5f);
+        setPower(0, 0, .25f);
     }
     void turnRight() {
-        setPower(0, 0, -.5f);
+        setPower(0, 0, -.25f);
     }
 }
