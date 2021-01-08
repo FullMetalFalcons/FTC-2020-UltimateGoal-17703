@@ -167,6 +167,8 @@ public class VisionAuto extends LinearOpMode {
 
         if (opModeIsActive()) {
 
+            resetEnc();
+
             backLeftMotor.setTargetPosition(-500);
             frontLeftMotor.setTargetPosition(-500);
             frontRightMotor.setTargetPosition(-500);
@@ -211,16 +213,16 @@ public class VisionAuto extends LinearOpMode {
                             }
                             resetEnc();
                             //Code for forward to A zone
-                            backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*2);
-                            frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*2);
-                            frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*2);
-                            backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*2);
+                            backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 2);
+                            frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 2);
+                            frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 2);
+                            backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 2);
                             while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() <= frontLeftMotor.getTargetPosition())) {
                                 moveForward();
                             }
                             stopBot();
 
-                        } else{
+                        } else {
                             // list is not empty.
                             // step through the list of recognitions and display boundary info.
                             int i = 0;
@@ -247,10 +249,10 @@ public class VisionAuto extends LinearOpMode {
                                     }
                                     resetEnc();
                                     //Code for forward to B zone
-                                    backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*3);
-                                    frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*3);
-                                    frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*3);
-                                    backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*3);
+                                    backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 3);
+                                    frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 3);
+                                    frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 3);
+                                    backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 3);
                                     while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() >= frontLeftMotor.getTargetPosition())) {
                                         moveForward();
                                     }
@@ -265,12 +267,12 @@ public class VisionAuto extends LinearOpMode {
                                     stackGenerator = 2;
                                     telemetry.addData("Stack Variable Value", stackGenerator);
                                     //code for strafe
-                                    strafeLeft();
+                                 /*   strafeLeft();
                                     sleep(500);
                                     moveForward();
                                     sleep(1500);
-                                    stopBot();
-                                  /*  backLeftMotor.setTargetPosition(-500);
+                                    stopBot(); */
+                                    backLeftMotor.setTargetPosition(-500);
                                     frontLeftMotor.setTargetPosition(500);
                                     frontRightMotor.setTargetPosition(-500);
                                     backRightMotor.setTargetPosition(500);
@@ -279,20 +281,20 @@ public class VisionAuto extends LinearOpMode {
                                     }
                                     resetEnc();
                                     //Code for forward to C zone
-                                    backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*4);
-                                    frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*4);
-                                    frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*4);
-                                    backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE*4);
+                                    backLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 4);
+                                    frontLeftMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 4);
+                                    frontRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 4);
+                                    backRightMotor.setTargetPosition(ENCODER_TICKS_PER_TILE * 4);
                                     while ((frontRightMotor.getCurrentPosition() >= frontRightMotor.getTargetPosition()) && (frontLeftMotor.getCurrentPosition() >= frontLeftMotor.getTargetPosition())) {
                                         moveForward();
                                     }
                                     stopBot();
-                                    */
+
 
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
                                 }
-                                stopBot();
+
 
 
                             }
@@ -302,6 +304,12 @@ public class VisionAuto extends LinearOpMode {
                     }
                 }
             }
+        }
+        stopBot();
+        if (tfod != null) {
+            tfod.shutdown();
+        }
+    }
 
 
 
@@ -343,14 +351,11 @@ public class VisionAuto extends LinearOpMode {
                 }
                 stopBot();
             }*/
-            }
 
 
 
-        if (tfod != null) {
-            tfod.shutdown();
-        }
-    }
+
+
 
     /**
      * Initialize the Vuforia localization engine.
@@ -406,22 +411,22 @@ public class VisionAuto extends LinearOpMode {
         setPower(0, 0, 0);
     }
     void moveForward() {
-        setPower(0, -.5f, 0);
+        setPower(0, -.25f, 0);
     }
     void moveBackward() {
-        setPower(0, .5f, 0);
+        setPower(0, .25f, 0);
     }
     void strafeLeft() {
-        setPower(.5f, 0, 0);
+        setPower(.25f, 0, 0);
     }
     void strafeRight() {
-        setPower(-.5f, 0, 0);
+        setPower(-.25f, 0, 0);
     }
     void turnLeft() {
-        setPower(0, 0, .5f);
+        setPower(0, 0, .25f);
     }
     void turnRight() {
-        setPower(0, 0, -.5f);
+        setPower(0, 0, -.25f);
     }
     public void resetEnc() {
         backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
