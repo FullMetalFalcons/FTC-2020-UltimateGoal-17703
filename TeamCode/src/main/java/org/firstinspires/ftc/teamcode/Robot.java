@@ -90,7 +90,7 @@ public class Robot extends LinearOpMode {
                 wristServo.setPosition(1);
             } else if (gamepad2.b) {
                 //Closes the wrist
-                wristServo.setPosition(.3);
+                wristServo.setPosition(.2);
             }
 
             if (gamepad2.y) {
