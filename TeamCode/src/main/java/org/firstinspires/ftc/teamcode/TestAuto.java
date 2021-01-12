@@ -61,28 +61,39 @@ public class TestAuto extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-           telemetry.addData("Status", "Running");
-           telemetry.addData("Initial Encoder Ticks", m1.getCurrentPosition());
-           telemetry.update();
+            telemetry.addData("Status", "Running");
+            telemetry.addData("Initial Encoder Ticks", m1.getCurrentPosition());
+            telemetry.update();
 
-           //645 worked at first
+            //645 worked at first
             m1.setTargetPosition(-500);
             m2.setTargetPosition(-500);
             m3.setTargetPosition(-500);
             m4.setTargetPosition(-500);
-           while (m3.getCurrentPosition() > m3.getTargetPosition() && m2.getCurrentPosition() > m1.getTargetPosition()) {
-               moveForward();
-           }
-           stopBot();
+            while (m3.getCurrentPosition() > m3.getTargetPosition() && m2.getCurrentPosition() > m2.getTargetPosition()) {
+                moveForward();
+            }
+            stopBot();
+            sleep(200);
 
-           telemetry.addData("Final Encoder Ticks", m1.getCurrentPosition());
-           telemetry.update();
+            setTargetPos(-600, false, false);
+            while (m2.getCurrentPosition() > m2.getTargetPosition()) {
+                moveForward();
+            }
+            stopBot();
+
+
+
+
+
+            telemetry.addData("Final Encoder Ticks", m1.getCurrentPosition());
+            telemetry.update();
 
         }
 
     }
 
-    void setPower(float powerStrafe, float powerForward, float powerTurn){
+    void setPower(float powerStrafe, float powerForward, float powerTurn) {
         double p1 = -powerStrafe + powerForward - powerTurn;
         double p2 = powerStrafe + powerForward - powerTurn;
         double p3 = -powerStrafe + powerForward + powerTurn;
@@ -104,25 +115,56 @@ public class TestAuto extends LinearOpMode {
     private void moveForward() {
         setPower(0, -.5f, 0);
     }
+
     private void stopBot() {
         m1.setPower(0);
         m2.setPower(0);
         m3.setPower(0);
         m4.setPower(0);
     }
+
     void moveBackward() {
         setPower(0, .5f, 0);
     }
+
     void strafeLeft() {
         setPower(.5f, 0, 0);
     }
+
     void strafeRight() {
         setPower(-.5f, 0, 0);
     }
+
     void turnLeft() {
         setPower(0, 0, .5f);
     }
+
     void turnRight() {
         setPower(0, 0, -.5f);
+    }
+
+    void setTargetPos(int encTicks, boolean isStrafingRight, boolean isStrafingLeft) {
+        int pos1 = encTicks;
+        int pos2 = encTicks;
+        int pos3 = encTicks;
+        int pos4 = encTicks;
+        //In Android Studio this would be for strafing right
+        if (isStrafingRight == true) {
+            pos1 = -encTicks;
+            pos2 = encTicks;
+            pos3 = -encTicks;
+            pos4 = encTicks;
+        }
+        //In Android Studio this would be for strafing left
+        if (isStrafingLeft == true) {
+            pos1 = encTicks;
+            pos2 = -encTicks;
+            pos3 = encTicks;
+            pos4 = -encTicks;
+        }
+        m1.setTargetPosition(pos1);
+        m2.setTargetPosition(pos2);
+        m3.setTargetPosition(pos3);
+        m4.setTargetPosition(pos4);
     }
 }
