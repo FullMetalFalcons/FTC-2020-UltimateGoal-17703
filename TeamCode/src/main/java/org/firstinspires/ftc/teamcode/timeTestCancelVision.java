@@ -55,18 +55,20 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@Autonomous(name = "Time-Based Vision with Wobble and Park", group = "FMF")
+@Autonomous(name = "Time-Based Vision Cancel Test", group = "FMF")
 //@Disabled
-public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
+public class timeTestCancelVision extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
 
-    int timeForwardTile = 1000;
-    int timeStrafeTile = 1500;
+    int timeForwardTile = 2000;
+    int timeStrafeTile = 3000;
     int timeBackwardTile = 900;
     int turnRightTime = 900;
     int turnLeftTime = 900;
+
+    int stackNumber;
 
     //The encoder tick value for the arm being vertical
     int fullyRaised;
@@ -170,11 +172,12 @@ public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
             moveForward();
             sleep(timeForwardTile);
             strafeLeft();
-            sleep(timeForwardTile);
+            sleep(timeStrafeTile);
             stopBot();
             sleep(200);
 
             while (opModeIsActive()) {
+
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -186,19 +189,7 @@ public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
 
-                            //This will theoretically bring the robot to the A zone
-                            strafeLeft();
-                            sleep(timeStrafeTile);
-                            moveForward();
-                            //This is 3 because we want to be ahead of the goal to drop the goal
-                            sleep(3*timeForwardTile);
-                            dropWobble();
-                            //This is going to the parking line
-                            moveBackward();
-                            sleep(3*timeBackwardTile);
-                            //May need to delete this in case it shuts down immediately (I hope not)
-                            tfod.shutdown();
-                            stopBot();
+                            stackNumber = 0;
 
                         } else {
                             // step through the list of recognitions and display boundary info.
@@ -213,34 +204,12 @@ public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
 
-                                    strafeRight();
-                                    sleep(timeStrafeTile);
-                                    moveForward();
-                                    sleep(timeForwardTile*4);
-                                    dropWobble();
-                                    moveBackward();
-                                    sleep(4*timeBackwardTile);
-                                    //See 0 stack comment
-                                    tfod.shutdown();
-                                    stopBot();
+                                    stackNumber = 1;
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
 
-                                    strafeLeft();
-                                    sleep(timeStrafeTile);
-                                    moveForward();
-                                    sleep(4*timeForwardTile);
-                                    turnRight();
-                                    sleep(turnRightTime);
-                                    dropWobble();
-                                    turnLeft();
-                                    sleep(turnLeftTime);
-                                    moveBackward();
-                                    sleep(4*timeBackwardTile);
-                                    //See 0 stack comment
-                                    tfod.shutdown();
-                                    stopBot();
+                                    stackNumber = 2;
 
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
@@ -251,6 +220,46 @@ public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
                     }
                 }
 
+                if (stackNumber == 0) {
+                    //This will theoretically bring the robot to the A zone
+                    strafeLeft();
+                    sleep(timeStrafeTile);
+                    moveForward();
+                    //This is 3 because we want to be ahead of the goal to drop the goal
+                    sleep(3 * timeForwardTile);
+                    //May need to delete this in case it shuts down immediately (I hope not)
+                    stopBot();
+                    tfod.shutdown();
+                    stopBot();
+                }
+
+                else if (stackNumber == 1) {
+                    strafeRight();
+                    sleep(timeStrafeTile-200);
+                    moveForward();
+                    sleep(timeForwardTile * 4);
+                    stopBot();
+                    tfod.shutdown();
+                    stopBot();
+                }
+
+               else if (stackNumber == 2) {
+                    strafeLeft();
+                    sleep(timeStrafeTile-200);
+                    moveForward();
+                    sleep(8 * timeForwardTile);
+                    stopBot();
+                    tfod.shutdown();
+                    stopBot();
+                }
+                else {
+                    stopBot();
+                }
+
+                //This shuts down vision and stops the robot from moving once all code has finished running
+               stopBot();
+                tfod = null;
+                stackNumber = 4;
             }
             stopBot();
         }
@@ -258,7 +267,7 @@ public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
         if (tfod != null) {
             tfod.shutdown();
         }
-    }
+   }
 
 
     /**
@@ -311,27 +320,27 @@ public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
     }
 
     private void moveForward() {
-        setPower(0, -.2f, 0);
+        setPower(0, -.1f, 0);
     }
 
     void moveBackward() {
-        setPower(0, .2f, 0);
+        setPower(0, .1f, 0);
     }
 
     void strafeLeft() {
-        setPower(.2f, 0, 0);
+        setPower(.1f, 0, 0);
     }
 
     void strafeRight() {
-        setPower(-.2f, 0, 0);
+        setPower(-.1f, 0, 0);
     }
 
     void turnLeft() {
-        setPower(0, 0, .2f);
+        setPower(0, 0, .1f);
     }
 
     void turnRight() {
-        setPower(0, 0, -.2f);
+        setPower(0, 0, -.1f);
     }
 
     void stopBot() {
@@ -352,6 +361,6 @@ public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
             wobbleMotor.setPower(.3);
         }
         wobbleMotor.setPower(0);
-     }
+    }
 
 }

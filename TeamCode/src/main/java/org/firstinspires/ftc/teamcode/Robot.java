@@ -78,9 +78,9 @@ public class Robot extends LinearOpMode {
             backRightMotor.setPower(p4*.8);
 
             if (gamepad2.left_bumper) {
-                wobbleMotor.setPower(-.30);
+                wobbleMotor.setPower(-.40);
             } else if (gamepad2.right_bumper) {
-                wobbleMotor.setPower(.30);
+                wobbleMotor.setPower(.40);
             } else {
                 wobbleMotor.setPower(0);
             }
@@ -101,15 +101,17 @@ public class Robot extends LinearOpMode {
 
             if (gamepad2.left_trigger > .05) {
                 hopper.setPower(1);
+                intake.setPower(1);
             } else {
                 hopper.setPower(0);
+                intake.setPower(0);
             }
 
-            if (gamepad2.right_trigger > .05) {
+           /* if (gamepad2.right_trigger > .05) {
                 intake.setPower(1);
             } else {
                 intake.setPower(0);
-            }
+            } */
         }
     }
 }
