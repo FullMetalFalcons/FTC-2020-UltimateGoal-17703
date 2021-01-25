@@ -55,27 +55,27 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@Autonomous(name = "Time-Based Vision Cancel Test", group = "FMF")
+@Autonomous(name = "Time-Based Vision Cancel Test Working", group = "FMF")
 //@Disabled
 public class timeTestCancelVision extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
 
-    int timeForwardTile = 2000;
-    int timeStrafeTile = 3000;
-    int timeBackwardTile = 900;
-    int turnRightTime = 900;
-    int turnLeftTime = 900;
+    int timeForwardTile = 500;
+    int timeStrafeTile = 1200;
+    int timeBackwardTile = 500;
+    int turnRightTime = 700;
+    int turnLeftTime = 700;
 
     int stackNumber;
 
     //The encoder tick value for the arm being vertical
     int fullyRaised;
     //The encoder tick value for the arm being in position to drop the wobble goal
-    int dropPosition;
+    int dropPosition = -4100;
     //The encoder tick value for the arm at rest
-    int restPosition;
+    int restPosition = 240;
 
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
     Servo wristServo;
@@ -167,15 +167,17 @@ public class timeTestCancelVision extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-
+/*
             //This is code to get the robot to the disc stack
             moveForward();
             sleep(timeForwardTile);
             strafeLeft();
             sleep(timeStrafeTile);
+            turnRight();
+            sleep(50);
             stopBot();
             sleep(200);
-
+*/
             while (opModeIsActive()) {
 
                 if (tfod != null) {
@@ -189,7 +191,15 @@ public class timeTestCancelVision extends LinearOpMode {
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
 
-                            stackNumber = 0;
+                            //This will theoretically bring the robot to the A zone
+                            strafeLeft();
+                            sleep(timeStrafeTile);
+                            moveForward();
+                            //This is 3 because we want to be ahead of the goal to drop the goal
+                            sleep(3 * timeForwardTile);
+                            //May need to delete this in case it shuts down immediately (I hope not)
+                            //dropWobble();
+                            stopBot();
 
                         } else {
                             // step through the list of recognitions and display boundary info.
@@ -204,12 +214,22 @@ public class timeTestCancelVision extends LinearOpMode {
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
 
-                                    stackNumber = 1;
+                                    strafeRight();
+                                    sleep(timeStrafeTile-200);
+                                    moveForward();
+                                    sleep(timeForwardTile * 4);
+                                    stopBot();
+
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
 
-                                    stackNumber = 2;
+                                    strafeLeft();
+                                    sleep(timeStrafeTile-200);
+                                    moveForward();
+                                    sleep(5 * timeForwardTile);
+                                    stopBot();
+
 
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
@@ -220,7 +240,7 @@ public class timeTestCancelVision extends LinearOpMode {
                     }
                 }
 
-                if (stackNumber == 0) {
+              /*  if (stackNumber == 0) {
                     //This will theoretically bring the robot to the A zone
                     strafeLeft();
                     sleep(timeStrafeTile);
@@ -228,6 +248,7 @@ public class timeTestCancelVision extends LinearOpMode {
                     //This is 3 because we want to be ahead of the goal to drop the goal
                     sleep(3 * timeForwardTile);
                     //May need to delete this in case it shuts down immediately (I hope not)
+                    //dropWobble();
                     stopBot();
                     tfod.shutdown();
                     stopBot();
@@ -247,19 +268,17 @@ public class timeTestCancelVision extends LinearOpMode {
                     strafeLeft();
                     sleep(timeStrafeTile-200);
                     moveForward();
-                    sleep(8 * timeForwardTile);
+                    sleep(5 * timeForwardTile);
                     stopBot();
                     tfod.shutdown();
                     stopBot();
                 }
                 else {
                     stopBot();
-                }
-
+                }*/
+stopBot();
                 //This shuts down vision and stops the robot from moving once all code has finished running
-               stopBot();
-                tfod = null;
-                stackNumber = 4;
+               // stackNumber = 4;
             }
             stopBot();
         }
@@ -320,27 +339,27 @@ public class timeTestCancelVision extends LinearOpMode {
     }
 
     private void moveForward() {
-        setPower(0, -.1f, 0);
+        setPower(0, -.3f, 0);
     }
 
     void moveBackward() {
-        setPower(0, .1f, 0);
+        setPower(0, .3f, 0);
     }
 
     void strafeLeft() {
-        setPower(.1f, 0, 0);
+        setPower(.3f, 0, 0);
     }
 
     void strafeRight() {
-        setPower(-.1f, 0, 0);
+        setPower(-.3f, 0, 0);
     }
 
     void turnLeft() {
-        setPower(0, 0, .1f);
+        setPower(0, 0, -.3f);
     }
 
     void turnRight() {
-        setPower(0, 0, -.1f);
+        setPower(0, 0, .3f);
     }
 
     void stopBot() {
