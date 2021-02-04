@@ -39,7 +39,7 @@ public class Robot extends LinearOpMode {
         hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
 
         intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        //intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
 
@@ -51,6 +51,7 @@ public class Robot extends LinearOpMode {
 
             telemetry.addData("Status", "Running");
             telemetry.addData("Wobble Encoder Value", wobbleMotor.getCurrentPosition());
+            telemetry.addData("Drive Base Encoders", backLeftMotor.getCurrentPosition());
             telemetry.addData("Shooter Velocity", shooter.getVelocity());
             telemetry.update();
 
@@ -79,6 +80,23 @@ public class Robot extends LinearOpMode {
                 frontLeftMotor.setPower(p2 * .2);
                 frontRightMotor.setPower(p3 * .2);
                 backRightMotor.setPower(p4 * .2);
+            } else if (gamepad1.right_trigger > .05) {
+                double p1 = -powerStrafe + powerForward - powerTurn;
+                double p2 = powerStrafe + powerForward - powerTurn;
+                double p3 = -powerStrafe + powerForward + powerTurn;
+                double p4 = powerStrafe + powerForward + powerTurn;
+                double max = Math.max(1.0, Math.abs(p1));
+                max = Math.max(max, Math.abs(p2));
+                max = Math.max(max, Math.abs(p3));
+                max = Math.max(max, Math.abs(p4));
+                p1 /= max;
+                p2 /= max;
+                p3 /= max;
+                p4 /= max;
+                backLeftMotor.setPower(p1 * .4);
+                frontLeftMotor.setPower(p2 * .4);
+                frontRightMotor.setPower(p3 * .4);
+                backRightMotor.setPower(p4 * .4);
             } else {
                 //Allows the robot to move
                 double p1 = -powerStrafe + powerForward - powerTurn;
@@ -113,7 +131,7 @@ public class Robot extends LinearOpMode {
                 wristServo.setPosition(1);
             } else if (gamepad2.b) {
                 //Closes the wrist
-                wristServo.setPosition(.2);
+                wristServo.setPosition(.3);
             }
 
             if (gamepad2.y) {

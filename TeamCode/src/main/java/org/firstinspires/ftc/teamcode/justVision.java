@@ -143,6 +143,8 @@ public class justVision extends LinearOpMode {
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
 
+
+
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
                                 }

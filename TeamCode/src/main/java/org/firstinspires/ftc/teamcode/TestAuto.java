@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -16,6 +17,7 @@ public class TestAuto extends LinearOpMode {
 
     private final double WHEEL_DIAMETER_INCHES = 4; //10.2cm
     private final double ENCODER_TICKS_PER_REV = 1120;
+    int dropPosition = -4776;
 
     @Override
     public void runOpMode() {
@@ -66,16 +68,8 @@ public class TestAuto extends LinearOpMode {
             telemetry.update();
 
             //645 worked at first
-            m1.setTargetPosition(-500);
-            m2.setTargetPosition(-500);
-            m3.setTargetPosition(-500);
-            m4.setTargetPosition(-500);
-            while (m3.getCurrentPosition() > m3.getTargetPosition() && m2.getCurrentPosition() > m2.getTargetPosition()) {
-                moveForward();
-            }
-            stopBot();
-            sleep(200);
 
+dropWobble();
 
 
             setTargetPos(-600, false, false);
@@ -83,6 +77,22 @@ public class TestAuto extends LinearOpMode {
                 moveForward();
             }
             stopBot();
+
+
+
+
+            //Move backward until at wall - 3 tiles backward
+            //Move to the left wall
+            //Move forward until our current position equals our target distance
+            boolean touchingBackWall = false;
+            int ticksToBackWall = -500;
+
+            while (touchingBackWall == false) {
+                setTargetPos(3*ticksToBackWall, false, false);
+                if (m1.getCurrentPosition() < m1.getTargetPosition()) {
+                    touchingBackWall = true;
+                }
+            }
 
 
 
@@ -115,7 +125,7 @@ public class TestAuto extends LinearOpMode {
     }
 
     private void moveForward() {
-        setPower(0, -.5f, 0);
+        setPower(0, -.2f, 0);
     }
 
     private void stopBot() {
@@ -169,4 +179,21 @@ public class TestAuto extends LinearOpMode {
         m3.setTargetPosition(pos3);
         m4.setTargetPosition(pos4);
     }
+
+    void dropWobble() {
+        //Will have to revise this with accurate sign value
+        wobbleMotor.setTargetPosition(dropPosition);
+        while (wobbleMotor.getCurrentPosition() >= wobbleMotor.getTargetPosition()) {
+            wobbleMotor.setPower(-.3);
+        }
+        wristServo.setPosition(1);
+        sleep(100);
+        wristServo.setPosition(.25);
+        wobbleMotor.setTargetPosition(0);
+        while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
+            wobbleMotor.setPower(.3);
+        }
+        wobbleMotor.setPower(0);
+    }
+
 }

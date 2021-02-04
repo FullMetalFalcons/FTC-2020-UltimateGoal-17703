@@ -346,7 +346,7 @@ public class VisionAutoTimeBasedWithWobblePark extends LinearOpMode {
         }
         wristServo.setPosition(1);
         sleep(100);
-        wristServo.setPosition(.2);
+        wristServo.setPosition(.25);
         wobbleMotor.setTargetPosition(restPosition);
         while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
             wobbleMotor.setPower(.3);

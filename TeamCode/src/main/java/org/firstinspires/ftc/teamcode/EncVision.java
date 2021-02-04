@@ -65,8 +65,9 @@ public class EncVision extends LinearOpMode {
     DcMotor m1, m2, m3, m4;
     Servo wristServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
-    int EncTicksPerTile;
-    int EncStrafeTile;
+    int EncTicksPerTile = -350;
+    int EncStrafeTile = -750;
+    int dropPosition = -4226;
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -121,7 +122,8 @@ public class EncVision extends LinearOpMode {
         wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        wobbleMotor.setTargetPosition(0);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         wristServo = hardwareMap.servo.get("hand_servo");
 
@@ -131,7 +133,7 @@ public class EncVision extends LinearOpMode {
         hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
 
         intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        //intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
@@ -163,15 +165,23 @@ public class EncVision extends LinearOpMode {
 
         if (opModeIsActive()) {
 
+
+            shootDisc();
             //This is where you write the code to move before vision kicks in
-            setTargetPos(EncTicksPerTile, false, false);
-            moveForward();
+            setTargetPos(-300, false, false);
+            while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                moveForward();
+            }
             resetEnc();
-            setTargetPos(EncStrafeTile, false, true);
-            strafeLeft();
+            shootDisc();
+            setTargetPos(-875, false, true);
+            while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                strafeLeft();
+            }
+            resetEnc();
             turnRight();
-            sleep(100);
-            resetEnc();
+            sleep(200);
+            shootDisc();
             stopBot();
 
             while (opModeIsActive()) {
@@ -186,11 +196,19 @@ public class EncVision extends LinearOpMode {
                             // empty list.  no objects recognized.
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
+                            telemetry.update();
 
-                            setTargetPos((int) (.5*EncStrafeTile), false, true);
-                            strafeLeft();
+                            sleep(2000);
+                            setTargetPos(-750, false, true);
+                            while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                                strafeLeft();
+                            }
                             resetEnc();
-                            setTargetPos(2*EncTicksPerTile, false, false);
+                            setTargetPos(6*EncTicksPerTile, false, false);
+                            while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                                moveForward();
+                            }
+                            dropWobble();
                             stopBot();
 
                         } else {
@@ -205,22 +223,45 @@ public class EncVision extends LinearOpMode {
 
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
+                                    telemetry.update();
 
-                                    setTargetPos(EncStrafeTile, true, false);
-                                    strafeRight();
+
+                                    sleep(2000);
+                                    setTargetPos(-750, true, false);
+                                    while (m1.getCurrentPosition() < m1.getTargetPosition()) {
+                                        strafeRight();
+                                    }
                                     resetEnc();
-                                    setTargetPos(EncTicksPerTile*3, false, false);
-                                    moveForward();
+                                    setTargetPos(EncTicksPerTile*4 + 200, false, false);
+                                    while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                                        moveForward();
+                                    }
                                     stopBot();
+
 
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
+                                    telemetry.update();
 
-                                    setTargetPos((int) (.5*EncStrafeTile), false, true);
-                                    strafeLeft();
+                                    sleep(2000);
+                                    setTargetPos(-750, false, true);
+                                    while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                                        strafeLeft();
+                                    }
                                     resetEnc();
-                                    setTargetPos(4*EncTicksPerTile, false, false);
+                                    setTargetPos(5*EncTicksPerTile, false, false);
+                                    while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                                        moveForward();
+                                    }
+                                    resetEnc();
+                                    turnRight();
+                                    sleep(600);
+                                    strafeLeft();
+                                    sleep(400);
+                                    moveForward();
+                                    sleep(500);
+                                    dropWobble();
                                     stopBot();
 
 
@@ -302,10 +343,12 @@ public class EncVision extends LinearOpMode {
         m2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         m3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         m4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     void moveForward() {
@@ -355,5 +398,31 @@ public class EncVision extends LinearOpMode {
         m2.setTargetPosition(pos2);
         m3.setTargetPosition(pos3);
         m4.setTargetPosition(pos4);
+    }
+
+    void dropWobble() {
+        //Will have to revise this with accurate sign value
+        wobbleMotor.setTargetPosition(dropPosition);
+        while (wobbleMotor.getCurrentPosition() >= wobbleMotor.getTargetPosition()) {
+            wobbleMotor.setPower(-.3);
+        }
+        wristServo.setPosition(1);
+        sleep(100);
+        wristServo.setPosition(.25);
+        wobbleMotor.setTargetPosition(0);
+        while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
+            wobbleMotor.setPower(.3);
+        }
+        wobbleMotor.setPower(0);
+    }
+
+    void shootDisc() {
+        shooter.setVelocity(1750);
+        hopper.setPower(1);
+        intake.setPower(1);
+        sleep(1500);
+        shooter.setPower(0);
+        hopper.setPower(0);
+        intake.setPower(0);
     }
 }
