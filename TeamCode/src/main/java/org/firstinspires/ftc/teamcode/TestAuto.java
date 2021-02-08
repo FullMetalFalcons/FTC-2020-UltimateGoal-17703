@@ -30,6 +30,11 @@ public class TestAuto extends LinearOpMode {
         m2.setTargetPosition(0);
         m3.setTargetPosition(0);
         m4.setTargetPosition(0);
+        m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        /*
         m1.setMode(DcMotor.RunMode.RESET_ENCODERS);
         m2.setMode(DcMotor.RunMode.RESET_ENCODERS);
         m3.setMode(DcMotor.RunMode.RESET_ENCODERS);
@@ -38,6 +43,7 @@ public class TestAuto extends LinearOpMode {
         m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        */
         m1.setDirection(DcMotorSimple.Direction.REVERSE);
         m2.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -69,18 +75,16 @@ public class TestAuto extends LinearOpMode {
 
             //645 worked at first
 
-dropWobble();
-
-
-            setTargetPos(-600, false, false);
-            while (m2.getCurrentPosition() > m2.getTargetPosition()) {
-                moveForward();
-            }
+            moveForward();
+            sleep(500);
             stopBot();
 
 
 
 
+
+
+/*
             //Move backward until at wall - 3 tiles backward
             //Move to the left wall
             //Move forward until our current position equals our target distance
@@ -92,7 +96,7 @@ dropWobble();
                 if (m1.getCurrentPosition() < m1.getTargetPosition()) {
                     touchingBackWall = true;
                 }
-            }
+            }*/
 
 
 
@@ -102,6 +106,7 @@ dropWobble();
             telemetry.update();
 
         }
+        //...
 
     }
 
@@ -148,11 +153,11 @@ dropWobble();
     }
 
     void turnLeft() {
-        setPower(0, 0, .5f);
+        setPower(0, 0, -.5f);
     }
 
     void turnRight() {
-        setPower(0, 0, -.5f);
+        setPower(0, 0, .5f);
     }
 
     void setTargetPos(int encTicks, boolean isStrafingRight, boolean isStrafingLeft) {

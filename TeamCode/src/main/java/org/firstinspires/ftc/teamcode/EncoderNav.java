@@ -55,31 +55,20 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@Autonomous(name = "Time-Based Vision Cancel Test Working", group = "FMF")
+@Autonomous(name = "Encoder Navigation", group = "FMF")
 //@Disabled
-public class timeTestCancelVision extends LinearOpMode {
+public class EncoderNav extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
 
-    int timeForwardTile = 500;
-    int timeStrafeTile = 1200;
-    int timeBackwardTile = 500;
-    int turnRightTime = 700;
-    int turnLeftTime = 700;
-
-    int stackNumber;
-
-    //The encoder tick value for the arm being vertical
-    int fullyRaised;
-    //The encoder tick value for the arm being in position to drop the wobble goal
-    int dropPosition = -4100;
-    //The encoder tick value for the arm at rest
-    int restPosition = 240;
-
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
     Servo wristServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
+    int EncTicksPerTile;
+    int Enc90Turn;
+    int EncStrafeTile;
+    int dropPosition;
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -94,7 +83,7 @@ public class timeTestCancelVision extends LinearOpMode {
      * and paste it in to your code on the next line, between the double quotes.
      */
     private static final String VUFORIA_KEY =
-            "AaE0cYT/////AAABmQA9EfxdE0nPnLBfBzgICwFuM0+4pL8yFpe+AfxfvUkzfy/u+lfdKve090kjx9rF3CjcaEWgi/SShmVX7gNbjpPYuzduVf/uN52ZKN2Ex9jjT/kIg6iDrwpjW6t4FAf78VPgOeMbc19LeAhjLurKvqUgfG6FoIGL5ou03s2LCGSER70le7KL8hqoh30jGwxWDo17PrVI4yL1ipHqjXaS8IZa4zuZvecrY9xNvdJawm4J2a5+td8v2Dq1jbuWSvJuGiaJjl4NnUhS/dv8Z9C0bN6s7ATfTq/4DsbBxZXF1JN5tofw59VOe67Z6KYmNIc+d5YrxQU6QhSp24poY5BzIPjFq8QIpK/FyhrEhN033v5/";
+            "AaE0cYT/////AAABmQA9EfxdE0nPnLBfBzgICwFuM0+4pL8yFpe+AfxfvUkzfy/u+lfdKve090kjx9rF3CjcaEWgi/SShmVX7gNbjpPYuzduVf/uN52ZKN2Ex9jjT/kIg6iDrwpjW6t4FAf78VPgOeMbc19LeAhjLurKvqUgfG6FoIGL5ou03s2LCGSER70le7KL8hqoh30jGwxWDo17PrVI4yL1ipHqjXaS8IZa4zuZvecrY9xNvdJawbackRightMotorJ2a5+td8v2Dq1jbuWSvJuGiaJjl4NnUhS/dv8Z9C0bN6s7ATfTq/4DsbBxZXF1JN5tofw59VOe67Z6KYmNIc+d5YrxQU6QhSp24poY5BzIPjFq8QIpK/FyhrEhN033v5/";
 
 
     /**
@@ -108,10 +97,44 @@ public class timeTestCancelVision extends LinearOpMode {
      * Detection engine.
      */
     private TFObjectDetector tfod;
-    int i = 0;
 
     @Override
     public void runOpMode() {
+
+        backLeftMotor= hardwareMap.dcMotor.get("back_left_motor");
+        frontLeftMotor = hardwareMap.dcMotor.get("front_left_motor");
+        frontRightMotor = hardwareMap.dcMotor.get("front_right_motor");
+        backRightMotor = hardwareMap.dcMotor.get("back_right_motor");
+
+        backLeftMotor.setTargetPosition(0);
+        frontLeftMotor.setTargetPosition(0);
+        frontRightMotor.setTargetPosition(0);
+        backRightMotor.setTargetPosition(0);
+
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
+        //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
+        wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        wobbleMotor.setTargetPosition(0);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        wristServo = hardwareMap.servo.get("hand_servo");
+
+        shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
+        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
+
+        intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
+        //intake.setDirection(DcMotorSimple.Direction.REVERSE);
+
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
         initVuforia();
@@ -135,52 +158,40 @@ public class timeTestCancelVision extends LinearOpMode {
             //tfod.setZoom(2.5, 1.78);
         }
 
-        backLeftMotor = hardwareMap.dcMotor.get("back_left_motor");
-        frontLeftMotor = hardwareMap.dcMotor.get("front_left_motor");
-        frontRightMotor = hardwareMap.dcMotor.get("front_right_motor");
-        backRightMotor = hardwareMap.dcMotor.get("back_right_motor");
-        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
-        //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
-        wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        wobbleMotor.setTargetPosition(0);
-        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        wristServo = hardwareMap.servo.get("hand_servo");
-
-        shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
-        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
-
-        intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
-
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
         waitForStart();
 
         if (opModeIsActive()) {
-/*
-            //This is code to get the robot to the disc stack
-            moveForward();
-            sleep(timeForwardTile);
-            strafeLeft();
-            sleep(timeStrafeTile);
-            turnRight();
-            sleep(50);
-            stopBot();
-            sleep(200);
-*/
-            while (opModeIsActive()) {
-                telemetry.addData("TestCount", i);
+
+            //Make stop to repeating based on vision
+
+            //This is where you write the code to move before vision kicks in
+            setTargetPos(-EncTicksPerTile, false, false);
+            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
+                moveForward();
+            }
+            resetEnc();
+
+            setTargetPos((int) (.5*EncStrafeTile), false, true);
+            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
+                strafeLeft();
+            }
+            resetEnc();
+
+            backLeftMotor.setTargetPosition(-50);
+            frontLeftMotor.setTargetPosition(-50);
+            frontRightMotor.setTargetPosition(50);
+            backRightMotor.setTargetPosition(50);
+            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition() && frontRightMotor.getCurrentPosition() < frontRightMotor.getTargetPosition()){
+                turnRight();
+            }
+            resetEnc();
+
+            //while
+            if (opModeIsActive()) {
+
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -191,7 +202,30 @@ public class timeTestCancelVision extends LinearOpMode {
                             // empty list.  no objects recognized.
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
+                            telemetry.update();
 
+                            sleep(2000);
+
+                            setTargetPos(-EncStrafeTile, false, true);
+                            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
+                                strafeLeft();
+                            }
+                            resetEnc();
+
+                            backLeftMotor.setTargetPosition(-120);
+                            frontLeftMotor.setTargetPosition(-120);
+                            frontRightMotor.setTargetPosition(120);
+                            backRightMotor.setTargetPosition(120);
+                            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition() && frontRightMotor.getCurrentPosition() < frontRightMotor.getTargetPosition()){
+                                turnRight();
+                            }
+                            resetEnc();
+
+                            setTargetPos(2*EncTicksPerTile, false, false);
+                            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
+                                moveForward();
+                            }
+                            stopBot();
 
 
                         } else {
@@ -206,20 +240,54 @@ public class timeTestCancelVision extends LinearOpMode {
 
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
+                                    telemetry.update();
+
+                                    //Make if statement based on null
+
+                                    sleep(2000);
+
+                                    setTargetPos(-EncStrafeTile, true, false);
+                                    while (backLeftMotor.getCurrentPosition() < backLeftMotor.getTargetPosition()) {
+                                        strafeRight();
+                                    }
+                                    resetEnc();
+
+                                    setTargetPos(EncTicksPerTile*3, false, false);
+                                    while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
+                                        moveForward();
+                                    }
+                                    stopBot();
+
 
 
 
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
+                                    telemetry.update();
 
+                                    sleep(2000);
 
-                                    strafeRight();
-                                    sleep(500);
-                                    moveForward();
-                                    sleep(500);
+                                    setTargetPos(-EncStrafeTile, false, true);
+                                    while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
+                                        strafeLeft();
+                                    }
+                                    resetEnc();
+
+                                    backLeftMotor.setTargetPosition(-100);
+                                    frontLeftMotor.setTargetPosition(-100);
+                                    frontRightMotor.setTargetPosition(100);
+                                    backRightMotor.setTargetPosition(100);
+                                    while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition() && frontRightMotor.getCurrentPosition() < frontRightMotor.getTargetPosition()){
+                                        turnRight();
+                                    }
+                                    resetEnc();
+
+                                    setTargetPos(4*EncTicksPerTile, false, false);
+                                    while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
+                                        moveForward();
+                                    }
                                     stopBot();
-                                    i++;
 
 
                                 } else {
@@ -230,54 +298,13 @@ public class timeTestCancelVision extends LinearOpMode {
                         telemetry.update();
                     }
                 }
-
-              /*  if (stackNumber == 0) {
-                    //This will theoretically bring the robot to the A zone
-                    strafeLeft();
-                    sleep(timeStrafeTile);
-                    moveForward();
-                    //This is 3 because we want to be ahead of the goal to drop the goal
-                    sleep(3 * timeForwardTile);
-                    //May need to delete this in case it shuts down immediately (I hope not)
-                    //dropWobble();
-                    stopBot();
-                    tfod.shutdown();
-                    stopBot();
-                }
-
-                else if (stackNumber == 1) {
-                    strafeRight();
-                    sleep(timeStrafeTile-200);
-                    moveForward();
-                    sleep(timeForwardTile * 4);
-                    stopBot();
-                    tfod.shutdown();
-                    stopBot();
-                }
-
-               else if (stackNumber == 2) {
-                    strafeLeft();
-                    sleep(timeStrafeTile-200);
-                    moveForward();
-                    sleep(5 * timeForwardTile);
-                    stopBot();
-                    tfod.shutdown();
-                    stopBot();
-                }
-                else {
-                    stopBot();
-                }*/
-stopBot();
-                //This shuts down vision and stops the robot from moving once all code has finished running
-               // stackNumber = 4;
             }
-            stopBot();
         }
 
         if (tfod != null) {
             tfod.shutdown();
         }
-   }
+    }
 
 
     /**
@@ -310,7 +337,7 @@ stopBot();
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
     }
 
-    void setPower(float powerStrafe, float powerForward, float powerTurn){
+    void setPower(float powerStrafe, float powerForward, float powerTurn) {
         double p1 = -powerStrafe + powerForward - powerTurn;
         double p2 = powerStrafe + powerForward - powerTurn;
         double p3 = -powerStrafe + powerForward + powerTurn;
@@ -329,7 +356,27 @@ stopBot();
         backRightMotor.setPower(p4);
     }
 
-    private void moveForward() {
+    private void stopBot() {
+        backLeftMotor.setPower(0);
+        frontLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backRightMotor.setPower(0);
+    }
+
+    void resetEnc() {
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    void moveForward() {
         setPower(0, -.3f, 0);
     }
 
@@ -353,24 +400,57 @@ stopBot();
         setPower(0, 0, .3f);
     }
 
-    void stopBot() {
-        setPower(0, 0, 0);
+    void setTargetPos(int encTicks, boolean isStrafingRight, boolean isStrafingLeft) {
+        int pos1 = encTicks;
+        int pos2 = encTicks;
+        int pos3 = encTicks;
+        int pos4 = encTicks;
+        //In Android Studio this would be for strafing right
+        if (isStrafingRight == true) {
+            pos1 = -encTicks;
+            pos2 = encTicks;
+            pos3 = -encTicks;
+            pos4 = encTicks;
+        }
+        //In Android Studio this would be for strafing left
+        if (isStrafingLeft == true) {
+            pos1 = encTicks;
+            pos2 = -encTicks;
+            pos3 = encTicks;
+            pos4 = -encTicks;
+        }
+        backLeftMotor.setTargetPosition(pos1);
+        frontLeftMotor.setTargetPosition(pos2);
+        frontRightMotor.setTargetPosition(pos3);
+        backRightMotor.setTargetPosition(pos4);
     }
 
     void dropWobble() {
         //Will have to revise this with accurate sign value
         wobbleMotor.setTargetPosition(dropPosition);
-        while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
+        while (wobbleMotor.getCurrentPosition() >= wobbleMotor.getTargetPosition()) {
             wobbleMotor.setPower(-.3);
         }
         wristServo.setPosition(1);
-        sleep(100);
-        wristServo.setPosition(.2);
-        wobbleMotor.setTargetPosition(restPosition);
-        while (wobbleMotor.getCurrentPosition() >= wobbleMotor.getTargetPosition()) {
+    }
+
+    void raiseWobble() {
+        wobbleMotor.setTargetPosition(0);
+        wristServo.setPosition(.25);
+        while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
             wobbleMotor.setPower(.3);
         }
         wobbleMotor.setPower(0);
     }
 
+    void shootDisc() {
+        shooter.setVelocity(1650);
+        sleep(700);
+        hopper.setPower(1);
+        intake.setPower(1);
+        sleep(2300);
+        shooter.setPower(0);
+        hopper.setPower(0);
+        intake.setPower(0);
+    }
 }

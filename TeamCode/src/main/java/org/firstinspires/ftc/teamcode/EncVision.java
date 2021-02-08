@@ -165,23 +165,33 @@ public class EncVision extends LinearOpMode {
 
         if (opModeIsActive()) {
 
+            //Make stop to repeating based on vision
+
 
             shootDisc();
             //This is where you write the code to move before vision kicks in
-            setTargetPos(-300, false, false);
+            setTargetPos(-250, false, false);
             while (m1.getCurrentPosition() > m1.getTargetPosition()) {
                 moveForward();
             }
             resetEnc();
+            sleep(100);
             shootDisc();
-            setTargetPos(-875, false, true);
+            setTargetPos(-1000, false, true);
             while (m1.getCurrentPosition() > m1.getTargetPosition()) {
                 strafeLeft();
             }
             resetEnc();
-            turnRight();
-            sleep(200);
-            shootDisc();
+            m1.setTargetPosition(-50);
+            m2.setTargetPosition(-50);
+            m3.setTargetPosition(50);
+            m4.setTargetPosition(50);
+            while (m1.getCurrentPosition() > m1.getTargetPosition() && m3.getCurrentPosition() < m3.getTargetPosition()){
+                turnRight();
+            }
+            stopBot();
+            sleep(300);
+            resetEnc();
             stopBot();
 
             while (opModeIsActive()) {
@@ -199,9 +209,17 @@ public class EncVision extends LinearOpMode {
                             telemetry.update();
 
                             sleep(2000);
-                            setTargetPos(-750, false, true);
+                            setTargetPos(-900, false, true);
                             while (m1.getCurrentPosition() > m1.getTargetPosition()) {
                                 strafeLeft();
+                            }
+                            resetEnc();
+                            m1.setTargetPosition(-120);
+                            m2.setTargetPosition(-120);
+                            m3.setTargetPosition(120);
+                            m4.setTargetPosition(120);
+                            while (m1.getCurrentPosition() > m1.getTargetPosition() && m3.getCurrentPosition() < m3.getTargetPosition()){
+                                turnRight();
                             }
                             resetEnc();
                             setTargetPos(6*EncTicksPerTile, false, false);
@@ -209,7 +227,9 @@ public class EncVision extends LinearOpMode {
                                 moveForward();
                             }
                             dropWobble();
+                            raiseWobble();
                             stopBot();
+
 
                         } else {
                             // step through the list of recognitions and display boundary info.
@@ -225,6 +245,7 @@ public class EncVision extends LinearOpMode {
                                     telemetry.addData("Target Zone", "B");
                                     telemetry.update();
 
+                                    //Make if statement based on null
 
                                     sleep(2000);
                                     setTargetPos(-750, true, false);
@@ -240,28 +261,32 @@ public class EncVision extends LinearOpMode {
 
 
 
+
+
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
                                     telemetry.update();
 
                                     sleep(2000);
-                                    setTargetPos(-750, false, true);
+                                    setTargetPos(-900, false, true);
                                     while (m1.getCurrentPosition() > m1.getTargetPosition()) {
                                         strafeLeft();
                                     }
                                     resetEnc();
-                                    setTargetPos(5*EncTicksPerTile, false, false);
+                                    m1.setTargetPosition(-100);
+                                    m2.setTargetPosition(-100);
+                                    m3.setTargetPosition(100);
+                                    m4.setTargetPosition(100);
+                                    while (m1.getCurrentPosition() > m1.getTargetPosition() && m3.getCurrentPosition() < m3.getTargetPosition()){
+                                        turnRight();
+                                    }
+                                    setTargetPos(6*EncTicksPerTile, false, false);
                                     while (m1.getCurrentPosition() > m1.getTargetPosition()) {
                                         moveForward();
                                     }
-                                    resetEnc();
-                                    turnRight();
-                                    sleep(600);
-                                    strafeLeft();
-                                    sleep(400);
-                                    moveForward();
-                                    sleep(500);
+
                                     dropWobble();
+                                    raiseWobble();
                                     stopBot();
 
 
@@ -368,11 +393,11 @@ public class EncVision extends LinearOpMode {
     }
 
     void turnLeft() {
-        setPower(0, 0, .3f);
+        setPower(0, 0, -.3f);
     }
 
     void turnRight() {
-        setPower(0, 0, -.3f);
+        setPower(0, 0, .3f);
     }
 
     void setTargetPos(int encTicks, boolean isStrafingRight, boolean isStrafingLeft) {
@@ -407,9 +432,11 @@ public class EncVision extends LinearOpMode {
             wobbleMotor.setPower(-.3);
         }
         wristServo.setPosition(1);
-        sleep(100);
-        wristServo.setPosition(.25);
+    }
+
+    void raiseWobble() {
         wobbleMotor.setTargetPosition(0);
+        wristServo.setPosition(.25);
         while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
             wobbleMotor.setPower(.3);
         }
@@ -417,10 +444,11 @@ public class EncVision extends LinearOpMode {
     }
 
     void shootDisc() {
-        shooter.setVelocity(1750);
+        shooter.setVelocity(1650);
+        sleep(700);
         hopper.setPower(1);
         intake.setPower(1);
-        sleep(1500);
+        sleep(2300);
         shooter.setPower(0);
         hopper.setPower(0);
         intake.setPower(0);
