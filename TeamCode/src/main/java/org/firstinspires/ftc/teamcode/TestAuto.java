@@ -93,7 +93,12 @@ public class TestAuto extends LinearOpMode {
             while (m1.isBusy() && m2.isBusy()) {
                 //Wait for them to stop
             }
+            setPower(0, 0,0);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
             setTargetPos(-700, true, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
             strafeRight();
 
             while (m1.isBusy() && m2.isBusy()) {
@@ -258,6 +263,13 @@ public class TestAuto extends LinearOpMode {
             wobbleMotor.setPower(.3);
         }
         wobbleMotor.setPower(0);
+    }
+
+    void setMode(DcMotor.RunMode mode) {
+        m1.setMode(mode);
+        m2.setMode(mode);
+        m3.setMode(mode);
+        m4.setMode(mode);
     }
 
 }
