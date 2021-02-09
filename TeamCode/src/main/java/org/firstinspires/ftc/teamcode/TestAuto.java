@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -20,7 +19,7 @@ public class TestAuto extends LinearOpMode {
     int dropPosition = -4776;
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
 
         m1 = hardwareMap.dcMotor.get("back_left_motor");
         m2 = hardwareMap.dcMotor.get("front_left_motor");
@@ -30,11 +29,10 @@ public class TestAuto extends LinearOpMode {
         m2.setTargetPosition(0);
         m3.setTargetPosition(0);
         m4.setTargetPosition(0);
-        m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+/*        m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        /*
+        */
         m1.setMode(DcMotor.RunMode.RESET_ENCODERS);
         m2.setMode(DcMotor.RunMode.RESET_ENCODERS);
         m3.setMode(DcMotor.RunMode.RESET_ENCODERS);
@@ -43,7 +41,7 @@ public class TestAuto extends LinearOpMode {
         m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        */
+
         m1.setDirection(DcMotorSimple.Direction.REVERSE);
         m2.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -75,10 +73,38 @@ public class TestAuto extends LinearOpMode {
 
             //645 worked at first
 
-            moveForward();
-            sleep(500);
+            /*setTargetPos(-800, false, false);
+            while (m1.getCurrentPosition() > m1.getTargetPosition()) {
+                moveForward();
+            }
             stopBot();
+             */
 
+          /*  setTargetPos(-800, false, false);
+            moveForward();
+            //resetEncValues();
+            sleep(4500);
+            resetEncValues();
+            */
+
+            setTargetPos(-800, false, false);
+            moveForward();
+
+            while (m1.isBusy() && m2.isBusy()) {
+                //Wait for them to stop
+            }
+            setTargetPos(-1600, true, false);
+            strafeRight();
+
+            while (m1.isBusy() && m2.isBusy()) {
+                //Wait for motors to finish previous code
+            }
+
+            setPower(0, 0, 0);
+
+
+            //setTargetPos(-1200, false, false);
+            //moveForward();
 
 
 
@@ -130,7 +156,7 @@ public class TestAuto extends LinearOpMode {
     }
 
     private void moveForward() {
-        setPower(0, -.2f, 0);
+        setPower(0, -.4f, 0);
     }
 
     private void stopBot() {
@@ -139,6 +165,39 @@ public class TestAuto extends LinearOpMode {
         m3.setPower(0);
         m4.setPower(0);
     }
+
+    void resetEncValues() {
+        m1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m1.setTargetPosition(0);
+        m2.setTargetPosition(0);
+        m3.setTargetPosition(0);
+        m4.setTargetPosition(0);
+        m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+/*
+    void resetEnc() {
+        m1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        m2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wobbleMotor.setTargetPosition(0);
+        m1.setTargetPosition(0);
+        m2.setTargetPosition(0);
+        m3.setTargetPosition(0);
+        m4.setTargetPosition(0);
+        m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }*/
 
     void moveBackward() {
         setPower(0, .5f, 0);

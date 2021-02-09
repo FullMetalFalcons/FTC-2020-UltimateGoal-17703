@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous (name = "Shooter Only", group = "17703")
+@Autonomous (name = "Shooter Only no Moving", group = "17703")
 public class ShootingOnly extends LinearOpMode {
 
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
@@ -63,11 +63,11 @@ public class ShootingOnly extends LinearOpMode {
     }
 
     void shootDisc() {
-        shooter.setVelocity(1650);
-        sleep(700);
+        shooter.setVelocity(1750);
+        sleep(1750);
         hopper.setPower(1);
         intake.setPower(1);
-        sleep(2300);
+        sleep(3000);
         shooter.setPower(0);
         hopper.setPower(0);
         intake.setPower(0);

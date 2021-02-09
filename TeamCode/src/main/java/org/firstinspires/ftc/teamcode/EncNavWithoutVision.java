@@ -13,8 +13,8 @@ public class EncNavWithoutVision extends LinearOpMode {
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
     Servo wristServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
-    int strafeTile;
-    int forwardTile;
+    int strafeTile = -800;
+    int forwardTile = -800;
     int turn90;
 
     //The encoder tick value for the arm being in position to drop the wobble goal
@@ -63,16 +63,22 @@ public class EncNavWithoutVision extends LinearOpMode {
         while (opModeIsActive()) {
             //Get to square A
             setTargetPos((int) (strafeTile*.8), false, true, false, false);
-            strafeLeft();
+            while (frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition()) {
+                strafeLeft();
+            }
             resetEnc();
             setTargetPos(forwardTile*3, false, false, false, false);
-            moveForward();
+            while (frontLeftMotor.getCurrentPosition() > frontLeftMotor.getTargetPosition()) {
+                moveForward();
+            }
             resetEnc();
             dropWobble();
             sleep(100);
             raiseWobble();
             setTargetPos((int) (-strafeTile*1.5), false, false, false, false);
-            moveBackward();
+            while (frontLeftMotor.getCurrentPosition() < frontLeftMotor.getTargetPosition()) {
+                moveBackward();
+            }
             stopBot();
 
             //Get to Square B
