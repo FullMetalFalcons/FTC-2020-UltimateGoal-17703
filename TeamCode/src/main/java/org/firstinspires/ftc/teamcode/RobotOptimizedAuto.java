@@ -21,7 +21,7 @@ public class RobotOptimizedAuto extends LinearOpMode {
             robot.driveToTick(forwardTile, .5f);
             robot.stopBot();
             robot.resetEncoders();
-            robot.driveToTick(strafeTile, .5f);
+            robot.strafeRightToTick(strafeTile, .5f);
         } catch (Exception ex){
             telemetry.addData("Path", "Exception Thrown");
         } finally {
