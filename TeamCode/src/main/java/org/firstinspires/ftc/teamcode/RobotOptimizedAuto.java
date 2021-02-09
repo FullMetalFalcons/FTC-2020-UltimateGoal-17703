@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous (name = "Optimized Auto", group = "17703")
 public class RobotOptimizedAuto extends LinearOpMode {
 
-    int forwardTile;
-    int strafeTile;
+    int forwardTile = -300;
+    int strafeTile = -400;
 
     @Override
     public void runOpMode() throws InterruptedException {

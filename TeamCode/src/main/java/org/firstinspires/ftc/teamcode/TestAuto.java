@@ -87,13 +87,13 @@ public class TestAuto extends LinearOpMode {
             resetEncValues();
             */
 
-            setTargetPos(-800, false, false);
+            setTargetPos(-300, false, false);
             moveForward();
 
             while (m1.isBusy() && m2.isBusy()) {
                 //Wait for them to stop
             }
-            setTargetPos(-1600, true, false);
+            setTargetPos(-700, true, false);
             strafeRight();
 
             while (m1.isBusy() && m2.isBusy()) {
