@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class RobotOptimizedAuto extends LinearOpMode {
 
     int forwardTile = -300;
-    int strafeTile = -400;
+    int strafeTile = -700;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -20,7 +20,7 @@ public class RobotOptimizedAuto extends LinearOpMode {
         try {
             robot.driveToTick(forwardTile, .5f);
             robot.stopBot();
-            robot.resetEncoders();
+           // robot.resetEncoders();
             robot.strafeRightToTick(strafeTile, .5f);
         } catch (Exception ex){
             telemetry.addData("Path", "Exception Thrown");

@@ -65,7 +65,7 @@ public class TestAuto extends LinearOpMode {
         telemetry.addData("Status", "Initializing");
         telemetry.update();
 
-        while (opModeIsActive()) {
+        if (opModeIsActive()) {
 
             telemetry.addData("Status", "Running");
             telemetry.addData("Initial Encoder Ticks", m1.getCurrentPosition());
@@ -87,24 +87,32 @@ public class TestAuto extends LinearOpMode {
             resetEncValues();
             */
 
-            setTargetPos(-300, false, false);
+            setTargetPos(-800, false, false);
             moveForward();
 
-            while (m1.isBusy() && m2.isBusy()) {
+            while (m1.isBusy() && m2.isBusy() && m3.isBusy() && m4.isBusy()) {
                 //Wait for them to stop
+                telemetry.addData("Status", "Moving Forward");
+                telemetry.addData("Encoders", m1.getCurrentPosition());
+                telemetry.update();
             }
+            telemetry.addData("Status", "Paused");
+            telemetry.update();
             setPower(0, 0,0);
+            sleep(500);
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-            setTargetPos(-700, true, false);
+            setTargetPos(-1500, true, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             strafeRight();
 
-            while (m1.isBusy() && m2.isBusy()) {
-                //Wait for motors to finish previous code
+            while (m1.isBusy() && m2.isBusy() && m3.isBusy() &&m4.isBusy()) {
+                telemetry.addData("Status", "Strafing");
+                telemetry.update();
             }
-
+            telemetry.addData("Status", "Stopped");
+            telemetry.update();
             setPower(0, 0, 0);
 
 
