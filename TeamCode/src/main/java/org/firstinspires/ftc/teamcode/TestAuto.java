@@ -87,15 +87,17 @@ public class TestAuto extends LinearOpMode {
             resetEncValues();
             */
 
-            setTargetPos(-800, false, false);
-            moveForward();
-
+            setTargetPos(-800, true, false);
+            strafeRight();
             while (m1.isBusy() && m2.isBusy() && m3.isBusy() && m4.isBusy()) {
                 //Wait for them to stop
                 telemetry.addData("Status", "Moving Forward");
                 telemetry.addData("Encoders", m1.getCurrentPosition());
                 telemetry.update();
             }
+            stopBot();
+
+            /*
             telemetry.addData("Status", "Paused");
             telemetry.update();
             setPower(0, 0,0);
@@ -115,7 +117,7 @@ public class TestAuto extends LinearOpMode {
             telemetry.update();
             setPower(0, 0, 0);
 
-
+*/
             //setTargetPos(-1200, false, false);
             //moveForward();
 
