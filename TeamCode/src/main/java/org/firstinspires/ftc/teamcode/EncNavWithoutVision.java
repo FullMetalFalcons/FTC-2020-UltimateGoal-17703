@@ -110,10 +110,10 @@ public class EncNavWithoutVision extends LinearOpMode {
             }
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setTargetPos((int) (-.3*forwardTile), false, false, false, false);
+            setTargetPos(-200, false, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
             moveBackward();
+            
             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
                 telemetry.addData("Robot Status", "Moving Back to Park");
                 telemetry.update();
@@ -123,27 +123,8 @@ public class EncNavWithoutVision extends LinearOpMode {
             telemetry.update();
 
             //Get to Square B
-/*
-            setTargetPos(strafeTile, true, false, false, false);
-            strafeRight();
-            resetEnc();
-            setTargetPos(3*forwardTile, false, false, false, false);
-            moveForward();
-            resetEnc();
-            setTargetPos(turn90, false, false, true, false);
-            turnRight();
-            resetEnc();
-            dropWobble();
-            sleep(100);
-            raiseWobble();
-            setTargetPos(turn90, false, false, false, false);
-            turnRight();
-            resetEnc();
-            setTargetPos((int) (1.5*forwardTile), false, false, false, false);
-            moveForward();
-            stopBot();
-*/
-/*
+
+            /*
             setTargetPos(strafeTile, true, false, false, false);
             strafeRight();
 
@@ -152,10 +133,17 @@ public class EncNavWithoutVision extends LinearOpMode {
                 telemetry.update();
             }
 
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            turnRight();
+            sleep(150);
+            moveForward();
+            sleep(150);
+
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             setTargetPos(4*forwardTile, false, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveForward();
+
             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
                 telemetry.addData("Robot Status", "Moving Forward");
                 telemetry.update();
@@ -183,25 +171,6 @@ public class EncNavWithoutVision extends LinearOpMode {
             */
 
             //Get to square C
-            /*
-            setTargetPos((int) (strafeTile*.8), false, true, false, false);
-            strafeLeft();
-            resetEnc();
-            setTargetPos(forwardTile*4, false, false, false, false);
-            moveForward();
-            resetEnc();
-            setTargetPos(turn90, false, false, true, false);
-            turnRight();
-            resetEnc();
-            setTargetPos(forwardTile, false, false, false, false);
-            moveForward();
-            resetEnc();
-            dropWobble();
-            sleep(100);
-            raiseWobble();
-            setTargetPos((int) (strafeTile*2.3), true, false, false, false);
-            stopBot();
-             */
 
             /*
             setTargetPos(strafeTile, false, false, false, false);
@@ -211,6 +180,12 @@ public class EncNavWithoutVision extends LinearOpMode {
                 telemetry.addData("Robot Status", "Strafing Left");
                 telemetry.update();
             }
+            stopBot();
+            sleep(175);
+
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            turnRight();
+            sleep(150);
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             setTargetPos(forwardTile*4, false, false, false, false);
@@ -224,6 +199,7 @@ public class EncNavWithoutVision extends LinearOpMode {
             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             turnRight();
             sleep(500);
+
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             setTargetPos(-450, false,false, false, false);
             strafeLeft();
