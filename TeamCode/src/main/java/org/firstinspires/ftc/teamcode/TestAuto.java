@@ -87,6 +87,7 @@ public class TestAuto extends LinearOpMode {
             resetEncValues();
             */
 
+            /*
             setTargetPos(-800, true, false);
             strafeRight();
             while (m1.isBusy() && m2.isBusy() && m3.isBusy() && m4.isBusy()) {
@@ -95,6 +96,31 @@ public class TestAuto extends LinearOpMode {
                 telemetry.addData("Encoders", m1.getCurrentPosition());
                 telemetry.update();
             }
+            stopBot();
+*/
+
+            setTargetPos(-500, false, true);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            strafeLeft();
+
+            while (m1.isBusy() && m2.isBusy() && m3.isBusy() && m4.isBusy()) {
+                telemetry.addData("Status", "Strafing Left");
+                telemetry.update();
+            }
+
+            stopBot();
+            sleep(200);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-500, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            moveForward();
+
+            while (m1.isBusy() && m2.isBusy() && m3.isBusy() && m4.isBusy()) {
+                telemetry.addData("Status", "Moving Forward");
+                telemetry.update();
+            }
+
             stopBot();
 
             /*
@@ -227,11 +253,11 @@ public class TestAuto extends LinearOpMode {
     }
 
     void turnLeft() {
-        setPower(0, 0, -.5f);
+        setPower(0, 0, -.3f);
     }
 
     void turnRight() {
-        setPower(0, 0, .5f);
+        setPower(0, 0, .3f);
     }
 
     void setTargetPos(int encTicks, boolean isStrafingRight, boolean isStrafingLeft) {

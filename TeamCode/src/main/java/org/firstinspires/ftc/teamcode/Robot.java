@@ -119,18 +119,18 @@ public class Robot extends LinearOpMode {
 
 
             if (gamepad2.left_bumper) {
-                wobbleMotor.setPower(-.40);
+                wobbleMotor.setPower(-.2);
             } else if (gamepad2.right_bumper) {
-                wobbleMotor.setPower(.40);
+                wobbleMotor.setPower(.2);
             } else {
                 wobbleMotor.setPower(0);
             }
 
             if (gamepad2.x) {
-                //Opens the wrist
-                wristServo.setPosition(1);
-            } else if (gamepad2.b) {
                 //Closes the wrist
+                wristServo.setPosition(.9);
+            } else if (gamepad2.b) {
+                //Opens the wrist
                 wristServo.setPosition(.3);
             }
 

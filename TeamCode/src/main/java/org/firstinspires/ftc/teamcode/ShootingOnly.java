@@ -72,4 +72,14 @@ public class ShootingOnly extends LinearOpMode {
         hopper.setPower(0);
         intake.setPower(0);
     }
+
+    void shootDisc2() {
+        shooter.setVelocity(1750);
+        //In the robot, mark the position where all 3 discs will start. From there, get encoder values required to bring the discs to the shooter.
+        //So, codewise it could be run shooter while the hopper is moving. Might not need intake to run
+    }
+
+    void shootPowershots() {
+
+    }
 }
