@@ -44,6 +44,7 @@ public class ShootingOnly extends LinearOpMode {
 
         shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         hopper = (DcMotorEx) hardwareMap.dcMotor.get("hopper_motor");
 
@@ -55,9 +56,7 @@ public class ShootingOnly extends LinearOpMode {
             telemetry.addData("Status", "Running");
             telemetry.update();
 
-            shootDisc();
-            sleep(1000);
-            shootDisc();
+            shootDiscDif();
 
         }
     }
@@ -73,8 +72,16 @@ public class ShootingOnly extends LinearOpMode {
         intake.setPower(0);
     }
 
-    void shootDisc2() {
+    void shootDiscDif() {
         shooter.setVelocity(1750);
+        sleep(5000);
+
+        while (shooter.isBusy()) {
+            sleep(1500);
+            hopper.setPower(1);
+            intake.setPower(1);
+        }
+        shooter.setPower(0);
         //In the robot, mark the position where all 3 discs will start. From there, get encoder values required to bring the discs to the shooter.
         //So, codewise it could be run shooter while the hopper is moving. Might not need intake to run
     }
