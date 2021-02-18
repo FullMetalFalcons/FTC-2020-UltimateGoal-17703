@@ -55,7 +55,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@Autonomous(name = "Encoder Navigation", group = "FMF")
+@Autonomous(name = "Vision Anti-Repeat Test", group = "FMF")
 //@Disabled
 public class EncoderNav extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
@@ -65,9 +65,8 @@ public class EncoderNav extends LinearOpMode {
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
     Servo wristServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
-    int EncTicksPerTile;
-    int Enc90Turn;
-    int EncStrafeTile;
+    int strafeTile = -900;
+    int forwardTile = -750;
     int dropPosition;
 
     /*
@@ -82,8 +81,7 @@ public class EncoderNav extends LinearOpMode {
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
-    private static final String VUFORIA_KEY =
-            "AaE0cYT/////AAABmQA9EfxdE0nPnLBfBzgICwFuM0+4pL8yFpe+AfxfvUkzfy/u+lfdKve090kjx9rF3CjcaEWgi/SShmVX7gNbjpPYuzduVf/uN52ZKN2Ex9jjT/kIg6iDrwpjW6t4FAf78VPgOeMbc19LeAhjLurKvqUgfG6FoIGL5ou03s2LCGSER70le7KL8hqoh30jGwxWDo17PrVI4yL1ipHqjXaS8IZa4zuZvecrY9xNvdJawbackRightMotorJ2a5+td8v2Dq1jbuWSvJuGiaJjl4NnUhS/dv8Z9C0bN6s7ATfTq/4DsbBxZXF1JN5tofw59VOe67Z6KYmNIc+d5YrxQU6QhSp24poY5BzIPjFq8QIpK/FyhrEhN033v5/";
+    private static final String VUFORIA_KEY = "AaE0cYT/////AAABmQA9EfxdE0nPnLBfBzgICwFuM0+4pL8yFpe+AfxfvUkzfy/u+lfdKve090kjx9rF3CjcaEWgi/SShmVX7gNbjpPYuzduVf/uN52ZKN2Ex9jjT/kIg6iDrwpjW6t4FAf78VPgOeMbc19LeAhjLurKvqUgfG6FoIGL5ou03s2LCGSER70le7KL8hqoh30jGwxWDo17PrVI4yL1ipHqjXaS8IZa4zuZvecrY9xNvdJawm4J2a5+td8v2Dq1jbuWSvJuGiaJjl4NnUhS/dv8Z9C0bN6s7ATfTq/4DsbBxZXF1JN5tofw59VOe67Z6KYmNIc+d5YrxQU6QhSp24poY5BzIPjFq8QIpK/FyhrEhN033v5/";
 
 
     /**
@@ -106,15 +104,17 @@ public class EncoderNav extends LinearOpMode {
         frontRightMotor = hardwareMap.dcMotor.get("front_right_motor");
         backRightMotor = hardwareMap.dcMotor.get("back_right_motor");
 
+        setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         backLeftMotor.setTargetPosition(0);
         frontLeftMotor.setTargetPosition(0);
         frontRightMotor.setTargetPosition(0);
         backRightMotor.setTargetPosition(0);
 
-        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -167,27 +167,35 @@ public class EncoderNav extends LinearOpMode {
 
             //Make stop to repeating based on vision
 
-            //This is where you write the code to move before vision kicks in
-            setTargetPos(-EncTicksPerTile, false, false);
-            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
-                moveForward();
-            }
-            resetEnc();
+            setTargetPos(-550, false, true, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            strafeLeft();
 
-            setTargetPos((int) (.5*EncStrafeTile), false, true);
-            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
-                strafeLeft();
+            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                telemetry.addData("Status", "Strafing Left");
+                telemetry.update();
             }
-            resetEnc();
 
-            backLeftMotor.setTargetPosition(-50);
-            frontLeftMotor.setTargetPosition(-50);
-            frontRightMotor.setTargetPosition(50);
-            backRightMotor.setTargetPosition(50);
-            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition() && frontRightMotor.getCurrentPosition() < frontRightMotor.getTargetPosition()){
-                turnRight();
+            stopBot();
+            sleep(200);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-200, false, false, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            moveForward();
+
+            while (backLeftMotor.isBusy() && backRightMotor.isBusy() && frontRightMotor.isBusy() && frontLeftMotor.isBusy()) {
+                telemetry.addData("Status", "Moving Forward");
+                telemetry.update();
             }
-            resetEnc();
+
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            turnRight();
+            sleep(50);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            stopBot();
+            sleep(1000);
 
             //while
             if (opModeIsActive()) {
@@ -204,29 +212,65 @@ public class EncoderNav extends LinearOpMode {
                             telemetry.addData("Target Zone", "A");
                             telemetry.update();
 
-                            sleep(2000);
+                            setTargetPos(strafeTile-100, false, true, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            strafeLeft();
 
-                            setTargetPos(-EncStrafeTile, false, true);
-                            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
-                                strafeLeft();
-                            }
-                            resetEnc();
-
-                            backLeftMotor.setTargetPosition(-120);
-                            frontLeftMotor.setTargetPosition(-120);
-                            frontRightMotor.setTargetPosition(120);
-                            backRightMotor.setTargetPosition(120);
-                            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition() && frontRightMotor.getCurrentPosition() < frontRightMotor.getTargetPosition()){
-                                turnRight();
-                            }
-                            resetEnc();
-
-                            setTargetPos(2*EncTicksPerTile, false, false);
-                            while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
-                                moveForward();
+                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                telemetry.addData("Robot Status", "Strafing Left");
+                                telemetry.update();
                             }
                             stopBot();
+                            sleep(175);
 
+                            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                            turnRight();
+                            sleep(200);
+
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(forwardTile*4, false, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            moveForward();
+
+                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                telemetry.addData("Robot Status", "Moving Forward");
+                                telemetry.update();
+                            }
+
+
+                            dropWobble();
+                            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                            moveForward();
+                            sleep(100);
+                            stopBot();
+                            sleep(200);
+                            raiseWobble();
+                            stopBot();
+
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(2*strafeTile, true, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            strafeRight();
+
+                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                telemetry.addData("Robot Status", "Strafing to Right to Avoid Wobble");
+                                telemetry.update();
+                            }
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(300, false, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            moveBackward();
+
+                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                telemetry.addData("Robot Status", "Moving Back to Park");
+                                telemetry.update();
+                            }
+                            stopBot();
+                            telemetry.addData("Robot Status", "Parked");
+                            telemetry.update();
 
                         } else {
                             // step through the list of recognitions and display boundary info.
@@ -242,60 +286,141 @@ public class EncoderNav extends LinearOpMode {
                                     telemetry.addData("Target Zone", "B");
                                     telemetry.update();
 
-                                    //Make if statement based on null
+                                    setTargetPos(strafeTile, true, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    strafeRight();
 
-                                    sleep(2000);
-
-                                    setTargetPos(-EncStrafeTile, true, false);
-                                    while (backLeftMotor.getCurrentPosition() < backLeftMotor.getTargetPosition()) {
-                                        strafeRight();
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Robot Status", "Strafing Right");
+                                        telemetry.update();
                                     }
-                                    resetEnc();
 
-                                    setTargetPos(EncTicksPerTile*3, false, false);
-                                    while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
-                                        moveForward();
+                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                                    turnLeft();
+                                    sleep(50);
+                                    moveForward();
+                                    sleep(150);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(5*forwardTile, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveForward();
+
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Robot Status", "Moving Forward");
+                                        telemetry.update();
                                     }
+
+                                    dropWobble();
+                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                                    moveForward();
+                                    sleep(100);
+                                    stopBot();
+                                    sleep(200);
+                                    raiseWobble();
                                     stopBot();
 
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(strafeTile, false, true, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    strafeLeft();
 
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Robot Status", "Strafing Left");
+                                        telemetry.update();
+                                    }
+                                    stopBot();
+                                    sleep(500);
 
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(strafeTile-400, true, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    strafeRight();
 
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Robot Status", "Strafing Right to Avoid Wobble Goal");
+                                        telemetry.update();
+                                    }
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(1200, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveBackward();
+
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Robot Status", "Moving Back to Park");
+                                        telemetry.update();
+                                    }
+                                    stopBot();
+                                    telemetry.addData("Robot Status", "Parked");
+                                    telemetry.update();
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
                                     telemetry.update();
 
-                                    sleep(2000);
+                                    setTargetPos(strafeTile-100, false, true, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    strafeLeft();
 
-                                    setTargetPos(-EncStrafeTile, false, true);
-                                    while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
-                                        strafeLeft();
-                                    }
-                                    resetEnc();
-
-                                    backLeftMotor.setTargetPosition(-100);
-                                    frontLeftMotor.setTargetPosition(-100);
-                                    frontRightMotor.setTargetPosition(100);
-                                    backRightMotor.setTargetPosition(100);
-                                    while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition() && frontRightMotor.getCurrentPosition() < frontRightMotor.getTargetPosition()){
-                                        turnRight();
-                                    }
-                                    resetEnc();
-
-                                    setTargetPos(4*EncTicksPerTile, false, false);
-                                    while (backLeftMotor.getCurrentPosition() > backLeftMotor.getTargetPosition()) {
-                                        moveForward();
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Robot Status", "Strafing Left");
+                                        telemetry.update();
                                     }
                                     stopBot();
+                                    sleep(150);
 
+                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                                    turnRight();
+                                    sleep(200);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos((int) (forwardTile*4.2), false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveForward();
+
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Robot Status", "Moving Forward");
+                                        telemetry.update();
+                                    }
+
+                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                                    turnRight();
+                                    sleep(1750);
+
+                                    stopBot();
+                                    sleep(300);
+
+                                    //Drop wobble here
+                                    dropWobble();
+                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                                    moveForward();
+                                    sleep(100);
+                                    stopBot();
+                                    sleep(200);
+                                    raiseWobble();
+                                    stopBot();
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(forwardTile, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveForward();
+
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Robot Status", "Moving to Parking Zone");
+                                        telemetry.update();
+                                    }
+
+                                    stopBot();
+                                    telemetry.addData("Robot Status", "Parked");
+                                    telemetry.update();
 
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
                                 }
                             }
                         }
-                        telemetry.update();
+                        //telemetry.update();
                     }
                 }
             }
@@ -400,7 +525,7 @@ public class EncoderNav extends LinearOpMode {
         setPower(0, 0, .3f);
     }
 
-    void setTargetPos(int encTicks, boolean isStrafingRight, boolean isStrafingLeft) {
+    void setTargetPos(int encTicks, boolean isStrafingRight, boolean isStrafingLeft, boolean isTurningRight, boolean isTurningLeft) {
         int pos1 = encTicks;
         int pos2 = encTicks;
         int pos3 = encTicks;
@@ -419,6 +544,18 @@ public class EncoderNav extends LinearOpMode {
             pos3 = encTicks;
             pos4 = -encTicks;
         }
+        if (isTurningRight == true) {
+            pos1 = encTicks;
+            pos2 = encTicks;
+            pos3 = -encTicks;
+            pos4 = -encTicks;
+        }
+        if (isTurningLeft) {
+            pos1 = -encTicks;
+            pos2 = -encTicks;
+            pos3 = encTicks;
+            pos4 = encTicks;
+        }
         backLeftMotor.setTargetPosition(pos1);
         frontLeftMotor.setTargetPosition(pos2);
         frontRightMotor.setTargetPosition(pos3);
@@ -426,22 +563,41 @@ public class EncoderNav extends LinearOpMode {
     }
 
     void dropWobble() {
+        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //Will have to revise this with accurate sign value
-        wobbleMotor.setTargetPosition(dropPosition);
-        while (wobbleMotor.getCurrentPosition() >= wobbleMotor.getTargetPosition()) {
-            wobbleMotor.setPower(-.3);
+        wobbleMotor.setTargetPosition(-1600);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setPower(-.15);
+
+        while (wobbleMotor.isBusy()) {
+            telemetry.addData("Status", "Wobble Lowering");
+            telemetry.update();
         }
-        wristServo.setPosition(1);
+        wobbleMotor.setPower(0);
+        wristServo.setPosition(.3);
     }
 
     void raiseWobble() {
         wobbleMotor.setTargetPosition(0);
-        wristServo.setPosition(.25);
-        while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
-            wobbleMotor.setPower(.3);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setPower(.15);
+
+        while (wobbleMotor.isBusy()) {
+            telemetry.addData("Status", "Wobble Raising");
+            telemetry.update();
         }
         wobbleMotor.setPower(0);
+        wristServo.setPosition(.9);
     }
+
+    void setMode(DcMotor.RunMode mode) {
+        frontRightMotor.setMode(mode);
+        frontLeftMotor.setMode(mode);
+        backRightMotor.setMode(mode);
+        backLeftMotor.setMode(mode);
+    }
+
+
 
     void shootDisc() {
         shooter.setVelocity(1650);

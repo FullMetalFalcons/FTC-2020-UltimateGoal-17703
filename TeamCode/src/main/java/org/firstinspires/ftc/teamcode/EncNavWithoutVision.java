@@ -13,8 +13,8 @@ public class EncNavWithoutVision extends LinearOpMode {
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
     Servo wristServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
-    int strafeTile = -1000;
-    int forwardTile = -800;
+    int strafeTile = -900;
+    int forwardTile = -750;
     int turn90;
 
     //The encoder tick value for the arm being in position to drop the wobble goal
@@ -62,9 +62,40 @@ public class EncNavWithoutVision extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            /*
+            setTargetPos(-550, false, true, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            strafeLeft();
+
+            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                telemetry.addData("Status", "Strafing Left");
+                telemetry.update();
+            }
+
+            stopBot();
+            sleep(200);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-200, false, false, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            moveForward();
+
+            while (backLeftMotor.isBusy() && backRightMotor.isBusy() && frontRightMotor.isBusy() && frontLeftMotor.isBusy()) {
+                telemetry.addData("Status", "Moving Forward");
+                telemetry.update();
+            }
+
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            turnRight();
+            sleep(50);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            stopBot();
+            sleep(100);
+
+
             //Get to square A
             setTargetPos(strafeTile, false, true, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
             strafeLeft();
 
             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
@@ -80,7 +111,7 @@ public class EncNavWithoutVision extends LinearOpMode {
 
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setTargetPos(forwardTile*3, false, false, false, false);
+            setTargetPos(forwardTile*4, false, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveForward();
 
@@ -89,17 +120,17 @@ public class EncNavWithoutVision extends LinearOpMode {
                 telemetry.update();
             }
 
-/*
+
             //Code for dropping the wobble, moving forward a bit, and then raising the arm
-            dropWobble();
-            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            moveForward();
-            sleep(50);
-            stopBot();
-            sleep(100);
-            raiseWobble();
-*/
-/*
+            //dropWobble();
+            //setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //moveForward();
+            //sleep(50);
+            //stopBot();
+            //sleep(100);
+            //raiseWobble();
+
+
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             setTargetPos(2*strafeTile, true, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -111,7 +142,7 @@ public class EncNavWithoutVision extends LinearOpMode {
             }
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setTargetPos(500, false, false, false, false);
+            setTargetPos(300, false, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveBackward();
 
@@ -122,12 +153,13 @@ public class EncNavWithoutVision extends LinearOpMode {
             stopBot();
             telemetry.addData("Robot Status", "Parked");
             telemetry.update();
-*/
+
 
             //Get to Square B
 
 /*
             setTargetPos(strafeTile, true, false, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
             strafeRight();
 
             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
@@ -137,12 +169,12 @@ public class EncNavWithoutVision extends LinearOpMode {
 
             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             turnLeft();
-            sleep(100);
+            sleep(50);
             moveForward();
             sleep(150);
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setTargetPos(4*forwardTile, false, false, false, false);
+            setTargetPos(5*forwardTile, false, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveForward();
 
@@ -196,9 +228,10 @@ public class EncNavWithoutVision extends LinearOpMode {
 */
 
             //Get to square C
-
+/*
 
             setTargetPos(strafeTile, false, true, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
             strafeLeft();
 
             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
@@ -210,10 +243,10 @@ public class EncNavWithoutVision extends LinearOpMode {
 
             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             turnRight();
-            sleep(150);
+            sleep(175);
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setTargetPos(forwardTile*4, false, false, false, false);
+            setTargetPos((int) (forwardTile*4.2), false, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveForward();
 
@@ -244,7 +277,7 @@ public class EncNavWithoutVision extends LinearOpMode {
             stopBot();
             telemetry.addData("Robot Status", "Parked");
             telemetry.update();
-
+*/
         }
 
     }
@@ -352,18 +385,14 @@ public class EncNavWithoutVision extends LinearOpMode {
     void dropWobble() {
         //Will have to revise this with accurate sign value
         wobbleMotor.setTargetPosition(-1700);
-        while (wobbleMotor.getCurrentPosition() >= wobbleMotor.getTargetPosition()) {
-            wobbleMotor.setPower(-.15);
-        }
+        wobbleMotor.setPower(-.15);
         wristServo.setPosition(.3);
     }
 
     void raiseWobble() {
         wobbleMotor.setTargetPosition(0);
-        while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
-            wobbleMotor.setPower(.15);
-        }
-        wobbleMotor.setPower(1);
+        wobbleMotor.setPower(.15);
+        wristServo.setPosition(.9);
     }
 
     void shootDisc() {

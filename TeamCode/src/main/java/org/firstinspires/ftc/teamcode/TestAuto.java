@@ -68,7 +68,7 @@ public class TestAuto extends LinearOpMode {
         if (opModeIsActive()) {
 
             telemetry.addData("Status", "Running");
-            telemetry.addData("Initial Encoder Ticks", m1.getCurrentPosition());
+            telemetry.addData("Initial Wobble Encoder Ticks", wobbleMotor.getCurrentPosition());
             telemetry.update();
 
             //645 worked at first
@@ -98,8 +98,9 @@ public class TestAuto extends LinearOpMode {
             }
             stopBot();
 */
-
-            setTargetPos(-500, false, true);
+            //Move to starting position
+/*
+            setTargetPos(-650, false, true);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             strafeLeft();
 
@@ -112,7 +113,7 @@ public class TestAuto extends LinearOpMode {
             sleep(200);
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setTargetPos(-500, false, false);
+            setTargetPos(-200, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveForward();
 
@@ -121,7 +122,30 @@ public class TestAuto extends LinearOpMode {
                 telemetry.update();
             }
 
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            turnRight();
+            sleep(50);
+
             stopBot();
+*/
+            //Test the wobble
+
+            dropWobble();
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            moveForward();
+            sleep(100);
+            stopBot();
+            sleep(200);
+            raiseWobble();
+            stopBot();
+
+
+
+
+
+
+
+
 
             /*
             telemetry.addData("Status", "Paused");
@@ -168,7 +192,7 @@ public class TestAuto extends LinearOpMode {
 
 
 
-
+            telemetry.addData("Wrist Position", wristServo.getPosition());
             telemetry.addData("Final Encoder Ticks", m1.getCurrentPosition());
             telemetry.update();
 
@@ -286,19 +310,31 @@ public class TestAuto extends LinearOpMode {
     }
 
     void dropWobble() {
+        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //Will have to revise this with accurate sign value
-        wobbleMotor.setTargetPosition(dropPosition);
-        while (wobbleMotor.getCurrentPosition() >= wobbleMotor.getTargetPosition()) {
-            wobbleMotor.setPower(-.3);
-        }
-        wristServo.setPosition(1);
-        sleep(100);
-        wristServo.setPosition(.25);
-        wobbleMotor.setTargetPosition(0);
-        while (wobbleMotor.getCurrentPosition() <= wobbleMotor.getTargetPosition()) {
-            wobbleMotor.setPower(.3);
+        wobbleMotor.setTargetPosition(-1600);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setPower(-.15);
+
+        while (wobbleMotor.isBusy()) {
+            telemetry.addData("Status", "Wobble Lowering");
+            telemetry.update();
         }
         wobbleMotor.setPower(0);
+        wristServo.setPosition(.3);
+    }
+
+    void raiseWobble() {
+        wobbleMotor.setTargetPosition(0);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setPower(.15);
+
+        while (wobbleMotor.isBusy()) {
+            telemetry.addData("Status", "Wobble Raising");
+            telemetry.update();
+        }
+        wobbleMotor.setPower(0);
+        wristServo.setPosition(.9);
     }
 
     void setMode(DcMotor.RunMode mode) {
