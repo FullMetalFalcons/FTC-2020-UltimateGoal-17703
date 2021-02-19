@@ -38,7 +38,7 @@ public class ShootingOnly extends LinearOpMode {
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         wobbleMotor.setTargetPosition(0);
-        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         wristServo = hardwareMap.servo.get("hand_servo");
 
@@ -52,17 +52,19 @@ public class ShootingOnly extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()) {
+        if (opModeIsActive()) {
             telemetry.addData("Status", "Running");
             telemetry.update();
 
+            shootDiscDif();
+            sleep(1000);
             shootDiscDif();
 
         }
     }
 
     void shootDisc() {
-        shooter.setVelocity(1750);
+        shooter.setVelocity(1550);
         sleep(1750);
         hopper.setPower(1);
         intake.setPower(1);
@@ -73,17 +75,36 @@ public class ShootingOnly extends LinearOpMode {
     }
 
     void shootDiscDif() {
-        shooter.setVelocity(1750);
-        sleep(5000);
+        shooter.setVelocity(1600);
+        while (shooter.isMotorEnabled()) {
+            sleep(2000);
+            hopper.setPower(1);
+            intake.setPower(1);
+            sleep(1000);
+            hopper.setPower(-1);
+            sleep(100);
+            shooter.setMotorDisable();
+        }
+        shooter.setMotorEnable();
+        shooter.setPower(0);
+        hopper.setPower(0);
+        intake.setPower(0);
+        //In the robot, mark the position where all 3 discs will start. From there, get encoder values required to bring the discs to the shooter.
+        //So, codewise it could be run shooter while the hopper is moving. Might not need intake to run
+    }
 
-        while (shooter.isBusy()) {
+    void shootDiscWhileVelocity() {
+        shooter.setVelocity(1750);
+
+        while (shooter.getVelocity() > 50) {
             sleep(1500);
             hopper.setPower(1);
             intake.setPower(1);
+            sleep(3000);
+            shooter.setPower(0);
         }
-        shooter.setPower(0);
-        //In the robot, mark the position where all 3 discs will start. From there, get encoder values required to bring the discs to the shooter.
-        //So, codewise it could be run shooter while the hopper is moving. Might not need intake to run
+        hopper.setPower(0);
+        intake.setPower(0);
     }
 
     void shootPowershots() {

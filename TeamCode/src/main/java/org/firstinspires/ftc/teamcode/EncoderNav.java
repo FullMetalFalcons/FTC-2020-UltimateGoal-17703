@@ -176,8 +176,15 @@ public class EncoderNav extends LinearOpMode {
                 telemetry.update();
             }
 
-            stopBot();
-            sleep(200);
+            shootDisc();
+            sleep(1000);
+            shootDisc();
+
+            while (shooter.getVelocity() > 50) {
+                stopBot();
+                telemetry.addData("Status", "Shooting");
+                telemetry.update();
+            }
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             setTargetPos(-200, false, false, false, false);
@@ -212,7 +219,7 @@ public class EncoderNav extends LinearOpMode {
                             telemetry.addData("Target Zone", "A");
                             telemetry.update();
 
-                            setTargetPos(strafeTile-100, false, true, false, false);
+                            setTargetPos(strafeTile+100, false, true, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             strafeLeft();
 
@@ -359,7 +366,7 @@ public class EncoderNav extends LinearOpMode {
                                     telemetry.addData("Target Zone", "C");
                                     telemetry.update();
 
-                                    setTargetPos(strafeTile-100, false, true, false, false);
+                                    setTargetPos(strafeTile+100, false, true, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     strafeLeft();
 
@@ -600,11 +607,17 @@ public class EncoderNav extends LinearOpMode {
 
 
     void shootDisc() {
-        shooter.setVelocity(1650);
-        sleep(700);
-        hopper.setPower(1);
-        intake.setPower(1);
-        sleep(2300);
+        shooter.setVelocity(1600);
+        while (shooter.isMotorEnabled()) {
+            sleep(2000);
+            hopper.setPower(1);
+            intake.setPower(1);
+            sleep(1000);
+            hopper.setPower(-1);
+            sleep(100);
+            shooter.setMotorDisable();
+        }
+        shooter.setMotorEnable();
         shooter.setPower(0);
         hopper.setPower(0);
         intake.setPower(0);
