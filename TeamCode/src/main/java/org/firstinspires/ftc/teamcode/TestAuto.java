@@ -99,7 +99,7 @@ public class TestAuto extends LinearOpMode {
             stopBot();
 */
             //Move to starting position
-/*
+
             setTargetPos(-650, false, true);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             strafeLeft();
@@ -109,7 +109,17 @@ public class TestAuto extends LinearOpMode {
                 telemetry.update();
             }
 
+           // stopBot();
+           // sleep(200);
+
             stopBot();
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(0, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            //Could disable motors while shoot and then re-enable them
+            shootDiscDif();
+            sleep(1000);
+            shootDiscDif();
             sleep(200);
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -127,8 +137,10 @@ public class TestAuto extends LinearOpMode {
             sleep(50);
 
             stopBot();
-*/
+
             //Test the wobble
+            /*
+            //Works
 
             dropWobble();
             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -139,7 +151,7 @@ public class TestAuto extends LinearOpMode {
             raiseWobble();
             stopBot();
 
-
+*/
 
 
 
@@ -342,6 +354,23 @@ public class TestAuto extends LinearOpMode {
         m2.setMode(mode);
         m3.setMode(mode);
         m4.setMode(mode);
+    }
+
+    void shootDiscDif() {
+        shooter.setVelocity(1600);
+        while (shooter.isMotorEnabled()) {
+            sleep(2000);
+            hopper.setPower(1);
+            sleep(1000);
+            hopper.setPower(-1);
+            sleep(100);
+            shooter.setMotorDisable();
+        }
+        shooter.setMotorEnable();
+        shooter.setPower(0);
+        hopper.setPower(0);
+        //In the robot, mark the position where all 3 discs will start. From there, get encoder values required to bring the discs to the shooter.
+        //So, codewise it could be run shooter while the hopper is moving. Might not need intake to run
     }
 
 }
