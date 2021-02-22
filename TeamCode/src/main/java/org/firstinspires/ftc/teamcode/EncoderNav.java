@@ -232,7 +232,7 @@ public class EncoderNav extends LinearOpMode {
 
                             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                             turnRight();
-                            sleep(200);
+                            sleep(230); //Was at 200 so testing it
 
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -362,6 +362,8 @@ public class EncoderNav extends LinearOpMode {
                                     telemetry.addData("Robot Status", "Parked");
                                     telemetry.update();
 
+
+
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
                                     telemetry.update();
@@ -379,10 +381,10 @@ public class EncoderNav extends LinearOpMode {
 
                                     setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                                     turnRight();
-                                    sleep(200);
+                                    sleep(230); //Was at 200 but testing it at 230
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos((int) (forwardTile*4.2), false, false, false, false);
+                                    setTargetPos((int) (forwardTile*4.4), false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveForward();
 
@@ -611,7 +613,6 @@ public class EncoderNav extends LinearOpMode {
         while (shooter.isMotorEnabled()) {
             sleep(2000);
             hopper.setPower(1);
-            intake.setPower(1);
             sleep(1000);
             hopper.setPower(-1);
             sleep(100);
@@ -620,6 +621,5 @@ public class EncoderNav extends LinearOpMode {
         shooter.setMotorEnable();
         shooter.setPower(0);
         hopper.setPower(0);
-        intake.setPower(0);
     }
 }
