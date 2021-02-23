@@ -176,11 +176,16 @@ public class EncoderNav extends LinearOpMode {
                 telemetry.update();
             }
 
+            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            turnRight();
+            sleep(70);
+            stopBot();
+
             shootDisc();
-            sleep(1000);
+            sleep(500);
             shootDisc();
 
-            while (shooter.getVelocity() > 50) {
+            while (shooter.getVelocity() > 1000) {
                 stopBot();
                 telemetry.addData("Status", "Shooting");
                 telemetry.update();
@@ -196,13 +201,9 @@ public class EncoderNav extends LinearOpMode {
                 telemetry.update();
             }
 
-            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            turnRight();
-            sleep(50);
-
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             stopBot();
-            sleep(1000);
+            sleep(500);
 
             //while
             if (opModeIsActive()) {
@@ -219,7 +220,7 @@ public class EncoderNav extends LinearOpMode {
                             telemetry.addData("Target Zone", "A");
                             telemetry.update();
 
-                            setTargetPos(strafeTile+100, false, true, false, false);
+                            setTargetPos(strafeTile-100, false, true, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             strafeLeft();
 
@@ -232,8 +233,8 @@ public class EncoderNav extends LinearOpMode {
 
                             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                             turnRight();
-                            sleep(230); //Was at 200 so testing it
-
+                            sleep(75); //Was at 200 so testing it
+                            stopBot();
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                             setTargetPos(forwardTile*4, false, false, false, false);
@@ -245,7 +246,11 @@ public class EncoderNav extends LinearOpMode {
                                 telemetry.update();
                             }
 
-
+                            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                            turnRight();
+                            sleep(150);
+                            stopBot();
+/*
                             dropWobble();
                             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                             moveForward();
@@ -253,9 +258,7 @@ public class EncoderNav extends LinearOpMode {
                             stopBot();
                             sleep(200);
                             raiseWobble();
-                            stopBot();
-
-
+*/
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                             setTargetPos(2*strafeTile, true, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -267,7 +270,7 @@ public class EncoderNav extends LinearOpMode {
                             }
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(300, false, false, false, false);
+                            setTargetPos(200, false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             moveBackward();
 
@@ -303,8 +306,8 @@ public class EncoderNav extends LinearOpMode {
                                     }
 
                                     setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                                    turnLeft();
-                                    sleep(50);
+                                    //turnLeft();
+                                    //sleep(50);
                                     moveForward();
                                     sleep(150);
 
@@ -317,7 +320,7 @@ public class EncoderNav extends LinearOpMode {
                                         telemetry.addData("Robot Status", "Moving Forward");
                                         telemetry.update();
                                     }
-
+/*
                                     dropWobble();
                                     setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                                     moveForward();
@@ -325,10 +328,9 @@ public class EncoderNav extends LinearOpMode {
                                     stopBot();
                                     sleep(200);
                                     raiseWobble();
-                                    stopBot();
-
+*/
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(strafeTile, false, true, false, false);
+                                    setTargetPos(strafeTile-400, false, true, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     strafeLeft();
 
@@ -368,7 +370,7 @@ public class EncoderNav extends LinearOpMode {
                                     telemetry.addData("Target Zone", "C");
                                     telemetry.update();
 
-                                    setTargetPos(strafeTile+100, false, true, false, false);
+                                    setTargetPos(strafeTile, false, true, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     strafeLeft();
 
@@ -381,7 +383,8 @@ public class EncoderNav extends LinearOpMode {
 
                                     setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                                     turnRight();
-                                    sleep(230); //Was at 200 but testing it at 230
+                                    sleep(75); //Was at 200 but testing it at 230
+                                    stopBot();
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                                     setTargetPos((int) (forwardTile*4.4), false, false, false, false);
@@ -395,11 +398,11 @@ public class EncoderNav extends LinearOpMode {
 
                                     setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                                     turnRight();
-                                    sleep(1750);
+                                    sleep(1600);
 
                                     stopBot();
                                     sleep(300);
-
+/*
                                     //Drop wobble here
                                     dropWobble();
                                     setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -408,8 +411,7 @@ public class EncoderNav extends LinearOpMode {
                                     stopBot();
                                     sleep(200);
                                     raiseWobble();
-                                    stopBot();
-
+*/
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                                     setTargetPos(forwardTile, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -609,9 +611,9 @@ public class EncoderNav extends LinearOpMode {
 
 
     void shootDisc() {
-        shooter.setVelocity(1600);
+        shooter.setVelocity(1625);
+        sleep(1000);
         while (shooter.isMotorEnabled()) {
-            sleep(2000);
             hopper.setPower(1);
             sleep(1000);
             hopper.setPower(-1);
