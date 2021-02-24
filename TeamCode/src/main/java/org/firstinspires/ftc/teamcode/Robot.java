@@ -119,9 +119,9 @@ public class Robot extends LinearOpMode {
 
 
             if (gamepad2.left_bumper) {
-                wobbleMotor.setPower(-.2);
-            } else if (gamepad2.right_bumper) {
                 wobbleMotor.setPower(.2);
+            } else if (gamepad2.right_bumper) {
+                wobbleMotor.setPower(-.2);
             } else {
                 wobbleMotor.setPower(0);
             }

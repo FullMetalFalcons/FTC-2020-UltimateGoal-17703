@@ -100,18 +100,22 @@ public class TestAuto extends LinearOpMode {
 */
             //Move to starting position
 
-            setTargetPos(-650, false, true);
+            setTargetPos(-550, true, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            strafeLeft();
+            strafeRight();
 
             while (m1.isBusy() && m2.isBusy() && m3.isBusy() && m4.isBusy()) {
                 telemetry.addData("Status", "Strafing Left");
                 telemetry.update();
             }
 
-           // stopBot();
-           // sleep(200);
+           stopBot();
+           sleep(200);
 
+            shootDisc();
+            sleep(500);
+            shootDisc();
+/*
             stopBot();
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             setTargetPos(0, false, false);
@@ -356,10 +360,10 @@ public class TestAuto extends LinearOpMode {
         m4.setMode(mode);
     }
 
-    void shootDiscDif() {
-        shooter.setVelocity(1600);
+    void shootDisc() {
+        shooter.setVelocity(1675);
+        sleep(1000);
         while (shooter.isMotorEnabled()) {
-            sleep(2000);
             hopper.setPower(1);
             sleep(1000);
             hopper.setPower(-1);
@@ -369,8 +373,6 @@ public class TestAuto extends LinearOpMode {
         shooter.setMotorEnable();
         shooter.setPower(0);
         hopper.setPower(0);
-        //In the robot, mark the position where all 3 discs will start. From there, get encoder values required to bring the discs to the shooter.
-        //So, codewise it could be run shooter while the hopper is moving. Might not need intake to run
     }
 
 }
