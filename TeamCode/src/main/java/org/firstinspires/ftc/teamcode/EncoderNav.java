@@ -238,7 +238,7 @@ public class EncoderNav extends LinearOpMode {
 
                             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                             turnRight();
-                            sleep(200); //Was at 200 so testing it
+                            sleep(240); //Was at 200 so testing it
                             stopBot();
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -312,7 +312,7 @@ public class EncoderNav extends LinearOpMode {
 
                                     setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                                     turnLeft();
-                                    sleep(100);
+                                    sleep(150);
                                     moveForward();
                                     sleep(150);
 
@@ -328,7 +328,7 @@ public class EncoderNav extends LinearOpMode {
                                     }
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(strafeTile-400, false, true, false, false);
+                                    setTargetPos(strafeTile-150, false, true, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     strafeLeft();
 
@@ -391,11 +391,11 @@ public class EncoderNav extends LinearOpMode {
 
                                     setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                                     turnRight();
-                                    sleep(200); //Was at 200 but testing it at 230
+                                    sleep(240); //Was at 200 but testing it at 230
                                     stopBot();
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos((int) (forwardTile*4.6), false, false, false, false);
+                                    setTargetPos((int) (forwardTile*4.75), false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveForward();
 
