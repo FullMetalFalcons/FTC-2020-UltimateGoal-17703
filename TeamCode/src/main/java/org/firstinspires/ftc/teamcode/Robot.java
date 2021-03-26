@@ -26,7 +26,6 @@ public class Robot extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
-        //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -54,7 +53,6 @@ public class Robot extends LinearOpMode {
             telemetry.addData("Drive Base Encoders", backLeftMotor.getCurrentPosition());
             telemetry.addData("Shooter Velocity", shooter.getVelocity());
             telemetry.update();
-
 
             double powerStrafe = -gamepad1.left_stick_x;
             if (Math.abs(powerStrafe) < 0.05) powerStrafe = 0;
@@ -151,11 +149,6 @@ public class Robot extends LinearOpMode {
                 intake.setPower(0);
             }
 
-           /* if (gamepad2.right_trigger > .05) {
-                intake.setPower(1);
-            } else {
-                intake.setPower(0);
-            } */
         }
     }
 }

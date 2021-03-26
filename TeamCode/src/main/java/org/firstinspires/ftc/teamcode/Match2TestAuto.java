@@ -29,8 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -38,12 +36,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+
+import java.util.List;
 
 /**
  * This 2020-2021 OpMode illustrates the basics of using the TensorFlow Object Detection API to
@@ -55,19 +54,17 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@Autonomous(name = "Working Vision Encoder Navigation", group = "FMF")
+@TeleOp(name = "Just Vision", group = "FMF")
 //@Disabled
-public class EncoderNav extends LinearOpMode {
+public class Match2TestAuto extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
-
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
-    Servo wristServo;
+    Servo wristServo, newWristLeft, newWristRight;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
-    int strafeTile = -900;
-    int forwardTile = -750;
-    int dropPosition;
+    int tileForward;
+    int tileStrafeRight;
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -81,7 +78,8 @@ public class EncoderNav extends LinearOpMode {
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
-    private static final String VUFORIA_KEY = "AaE0cYT/////AAABmQA9EfxdE0nPnLBfBzgICwFuM0+4pL8yFpe+AfxfvUkzfy/u+lfdKve090kjx9rF3CjcaEWgi/SShmVX7gNbjpPYuzduVf/uN52ZKN2Ex9jjT/kIg6iDrwpjW6t4FAf78VPgOeMbc19LeAhjLurKvqUgfG6FoIGL5ou03s2LCGSER70le7KL8hqoh30jGwxWDo17PrVI4yL1ipHqjXaS8IZa4zuZvecrY9xNvdJawm4J2a5+td8v2Dq1jbuWSvJuGiaJjl4NnUhS/dv8Z9C0bN6s7ATfTq/4DsbBxZXF1JN5tofw59VOe67Z6KYmNIc+d5YrxQU6QhSp24poY5BzIPjFq8QIpK/FyhrEhN033v5/";
+    private static final String VUFORIA_KEY =
+            "AaE0cYT/////AAABmQA9EfxdE0nPnLBfBzgICwFuM0+4pL8yFpe+AfxfvUkzfy/u+lfdKve090kjx9rF3CjcaEWgi/SShmVX7gNbjpPYuzduVf/uN52ZKN2Ex9jjT/kIg6iDrwpjW6t4FAf78VPgOeMbc19LeAhjLurKvqUgfG6FoIGL5ou03s2LCGSER70le7KL8hqoh30jGwxWDo17PrVI4yL1ipHqjXaS8IZa4zuZvecrY9xNvdJawm4J2a5+td8v2Dq1jbuWSvJuGiaJjl4NnUhS/dv8Z9C0bN6s7ATfTq/4DsbBxZXF1JN5tofw59VOe67Z6KYmNIc+d5YrxQU6QhSp24poY5BzIPjFq8QIpK/FyhrEhN033v5/";
 
 
     /**
@@ -126,6 +124,9 @@ public class EncoderNav extends LinearOpMode {
         wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         wristServo = hardwareMap.servo.get("hand_servo");
+        newWristLeft = hardwareMap.servo.get("left_wrist_servo");
+        newWristRight = hardwareMap.servo.get("right_wrist_servo");
+        newWristRight.setDirection(Servo.Direction.REVERSE);
 
         shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -164,55 +165,7 @@ public class EncoderNav extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-
-            //Make stop to repeating based on vision
-
-            setTargetPos(-550, false, true, false, false);
-            setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            strafeLeft();
-
-            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                telemetry.addData("Status", "Strafing Left");
-                telemetry.update();
-            }
-
-            stopBot();
-            sleep(200);
-
-            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            turnRight();
-            sleep(150);
-            //turnLeft();
-            //sleep(100);
-            stopBot();
-
-            shootDisc();
-            sleep(500);
-            shootDisc();
-
-            while (shooter.getVelocity() > 1000) {
-                stopBot();
-                telemetry.addData("Status", "Shooting");
-                telemetry.update();
-            }
-
-            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setTargetPos(-200, false, false, false, false);
-            setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            moveForward();
-
-            while (backLeftMotor.isBusy() && backRightMotor.isBusy() && frontRightMotor.isBusy() && frontLeftMotor.isBusy()) {
-                telemetry.addData("Status", "Moving Forward");
-                telemetry.update();
-            }
-
-            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            stopBot();
-            sleep(1000);
-
-            //while
             if (opModeIsActive()) {
-
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -223,69 +176,52 @@ public class EncoderNav extends LinearOpMode {
                             // empty list.  no objects recognized.
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
-                            telemetry.update();
 
-                            setTargetPos(strafeTile-100, false, true, false, false);
-                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            strafeLeft();
-
-                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Robot Status", "Strafing Left");
-                                telemetry.update();
-                            }
-                            stopBot();
-                            sleep(175);
-
-                            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                            turnRight();
-                            sleep(240); //Was at 200 so testing it
-                            stopBot();
-
-                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(forwardTile*4, false, false, false, false);
+                            //Move forward to Target Zone A drop area
+                            setTargetPos((int) (2.6*tileForward), false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             moveForward();
 
                             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Robot Status", "Moving Forward");
+                                telemetry.addData("Status", "Moving to Target Zone A");
                                 telemetry.update();
                             }
 
-                            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                            turnRight();
-                            sleep(125);
-                            stopBot();
-
-                            dropWobble();
-                            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                            moveForward();
-                            sleep(150);
-                            stopBot();
-                            sleep(200);
-                            raiseWobble();
-
+                            //Resets Encoders and moves back to avoid picking up the wobble again
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(2*strafeTile, true, false, false, false);
-                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            strafeRight();
-
-                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Robot Status", "Strafing to Right to Avoid Wobble");
-                                telemetry.update();
-                            }
-
-                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(200, false, false, false, false);
+                            openWrist();
+                            sleep(300);
+                            setTargetPos((int) (-.1*tileForward), false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             moveBackward();
 
                             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Robot Status", "Moving Back to Park");
+                                telemetry.addData("Status", "Moving Back to Avoid Wobble");
                                 telemetry.update();
                             }
+
+                            //Shuts the wrist and strafes right to the shooting area
+                            closeWrist();
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(tileStrafeRight, true, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            strafeRight();
+
+                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                telemetry.addData("Status", "Strafing to Shooting Position");
+                                telemetry.update();
+                            }
+
                             stopBot();
-                            telemetry.addData("Robot Status", "Parked");
-                            telemetry.update();
+                            //Shoot the discs
+
+                            //Parks on the line
+                            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                            moveForward();
+                            sleep(200);
+
+                            stopBot();
+
 
                         } else {
                             // step through the list of recognitions and display boundary info.
@@ -299,156 +235,128 @@ public class EncoderNav extends LinearOpMode {
 
                                 if (recognition.getLabel().equals("Single")) {
                                     telemetry.addData("Target Zone", "B");
-                                    telemetry.update();
 
-                                    setTargetPos(strafeTile, true, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    strafeRight();
-
-                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Robot Status", "Strafing Right");
-                                        telemetry.update();
-                                    }
-
-                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                                    turnLeft();
-                                    sleep(75);
-                                    moveForward();
-                                    sleep(150);
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(5*forwardTile, false, false, false, false);
+                                    //Moves to be parallel with the shooting line
+                                    setTargetPos((int) (2.5*tileForward), false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveForward();
 
                                     while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Robot Status", "Moving Forward");
-                                        telemetry.addData("Wobble Encoder Value", wobbleMotor.getCurrentPosition());
+                                        telemetry.addData("Status", "Moving Forward to Shooting Position");
                                         telemetry.update();
                                     }
 
+                                    //Resets the encoders
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(strafeTile-150, false, true, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    strafeLeft();
-
-                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Robot Status", "Strafing Left");
-                                        telemetry.update();
-                                    }
-
                                     stopBot();
                                     sleep(300);
 
-                                    //Drop wobble here
-                                    dropWobble();
-                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                                    moveForward();
-                                    sleep(150);
-                                    stopBot();
-                                    sleep(200);
-                                    raiseWobble();
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(strafeTile-400, true, false, false, false);
+                                    //Robot strafes to the area it will shoot from
+                                    setTargetPos(tileStrafeRight, true, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     strafeRight();
 
                                     while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Robot Status", "Strafing Right to Avoid Wobble Goal");
+                                        telemetry.addData("Status", "Strafing to Shooting Position");
                                         telemetry.update();
                                     }
 
+                                    stopBot();
+                                    //Shoot
+
+                                    //Moves forward to parking zone B
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(1500, false, false, false, false);
+                                    setTargetPos(tileForward, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveForward();
+
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Status", "Moving to Target Zone B");
+                                        telemetry.update();
+                                    }
+
+                                    //Drops the wobble
+                                    openWrist();
+                                    stopBot();
+                                    sleep(300);
+
+                                    //Moves back to parking zone
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos((int) (-.8*tileForward), false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveBackward();
 
                                     while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Robot Status", "Moving Back to Park");
+                                        telemetry.addData("Status", "Moving to Parking Zone");
                                         telemetry.update();
                                     }
-                                    stopBot();
-                                    telemetry.addData("Robot Status", "Parked");
-                                    telemetry.update();
 
+                                    closeWrist();
+                                    stopBot();
 
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
-                                    telemetry.update();
 
-                                    setTargetPos(strafeTile, false, true, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    strafeLeft();
-
-                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Robot Status", "Strafing Left");
-                                        telemetry.update();
-                                    }
-                                    stopBot();
-                                    sleep(150);
-
-                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                                    turnRight();
-                                    sleep(240); //Was at 200 but testing it at 230
-                                    stopBot();
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos((int) (forwardTile*4.75), false, false, false, false);
+                                    //Moves forward to target zone C
+                                    setTargetPos((int) (4.5*tileForward), false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveForward();
 
                                     while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Robot Status", "Moving Forward");
+                                        telemetry.addData("Status", "Moving to Target Zone C");
                                         telemetry.update();
                                     }
 
-                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                                    turnRight();
-                                    sleep(1600);
-
-                                    stopBot();
+                                    //Opens the wrist and then moves back until it robot is parallel to shooting position
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    openWrist();
                                     sleep(300);
-
-                                    //Drop wobble here
-                                    dropWobble();
-                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                                    moveForward();
-                                    sleep(150);
-                                    stopBot();
-                                    sleep(200);
-                                    raiseWobble();
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(forwardTile, false, false, false, false);
+                                    setTargetPos(-2*tileForward, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveForward();
+                                    moveBackward();
 
                                     while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Robot Status", "Moving to Parking Zone");
+                                        telemetry.addData("Status", "Moving Back to Shooting Position");
+                                        telemetry.update();
+                                    }
+
+                                    closeWrist();
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(tileStrafeRight, true, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    strafeRight();
+
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Status", "Strafing to Shooting Position");
                                         telemetry.update();
                                     }
 
                                     stopBot();
-                                    telemetry.addData("Robot Status", "Parked");
-                                    telemetry.update();
+                                    //Shoot the discs
+
+                                    //Parks on the line
+                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                                    moveForward();
+                                    sleep(200);
+
+                                    stopBot();
 
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
                                 }
                             }
                         }
-                        //telemetry.update();
+                                    telemetry.update();
+                                }
+                            }
+                        }
+                    }
+
+                    if (tfod != null) {
+                        tfod.shutdown();
                     }
                 }
-            }
-        }
-
-        if (tfod != null) {
-            tfod.shutdown();
-        }
-    }
 
 
     /**
@@ -620,7 +528,15 @@ public class EncoderNav extends LinearOpMode {
         backLeftMotor.setMode(mode);
     }
 
+    void openWrist() {
+        newWristLeft.setPosition(.5);
+        newWristRight.setPosition(.5);
+    }
 
+    void closeWrist() {
+        newWristRight.setPosition(0);
+        newWristLeft.setPosition(0);
+    }
 
     void shootDisc() {
         shooter.setVelocity(1675);

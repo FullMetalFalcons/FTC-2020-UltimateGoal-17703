@@ -33,10 +33,7 @@ public class TestAuto extends LinearOpMode {
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         */
-        m1.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        m2.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        m3.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        m4.setMode(DcMotor.RunMode.RESET_ENCODERS);
+
         m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -102,7 +99,10 @@ public class TestAuto extends LinearOpMode {
 
             setTargetPos(-550, true, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            strafeRight();
+            testMove();
+
+
+            //Make code for the powershots using IMU
 
             while (m1.isBusy() && m2.isBusy() && m3.isBusy() && m4.isBusy()) {
                 telemetry.addData("Status", "Strafing Left");
@@ -110,11 +110,7 @@ public class TestAuto extends LinearOpMode {
             }
 
            stopBot();
-           sleep(200);
 
-            shootDisc();
-            sleep(500);
-            shootDisc();
 /*
             stopBot();
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -353,6 +349,7 @@ public class TestAuto extends LinearOpMode {
         wristServo.setPosition(.9);
     }
 
+
     void setMode(DcMotor.RunMode mode) {
         m1.setMode(mode);
         m2.setMode(mode);
@@ -375,4 +372,12 @@ public class TestAuto extends LinearOpMode {
         hopper.setPower(0);
     }
 
+    void testMove() {
+        m1.setPower(.5);
+        m2.setPower(.5);
+        m3.setPower(.5);
+        m4.setPower(.5);
+    }
+
 }
+
