@@ -63,6 +63,8 @@ public class Match2TestAuto extends LinearOpMode {
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
     Servo wristServo, newWristLeft, newWristRight;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
+    double currentHeading;
+    double originalHeading;
     int tileForward;
     int tileStrafeRight;
 
@@ -165,6 +167,12 @@ public class Match2TestAuto extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
+
+            telemetry.addData("Robot Status", "Securing the Wobble");
+            telemetry.update();
+            sleep(100);
+            //wristServoAuto.setPosition(0.5);
+
             if (opModeIsActive()) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
@@ -552,4 +560,18 @@ public class Match2TestAuto extends LinearOpMode {
         shooter.setPower(0);
         hopper.setPower(0);
     }
+
+
+    void returnStartOrientation() {
+        
+        while (currentHeading != originalHeading) {
+            if (currentHeading < 0) {
+                turnRight();
+            }
+            if (currentHeading > 0) {
+                turnLeft();
+            }
+        }
+    }
+
 }
