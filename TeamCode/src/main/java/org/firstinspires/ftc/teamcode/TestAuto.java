@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class TestAuto extends LinearOpMode {
 
     DcMotor m1, m2, m3, m4;
-    Servo wristServo;
+    Servo wristServo, wristServoAuto;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
 
     private final double WHEEL_DIAMETER_INCHES = 4; //10.2cm
@@ -34,6 +34,7 @@ public class TestAuto extends LinearOpMode {
         m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         */
 
+        setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -48,6 +49,7 @@ public class TestAuto extends LinearOpMode {
         wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         wristServo = hardwareMap.servo.get("hand_servo");
+        wristServoAuto = hardwareMap.servo.get("hand_servo_auto");
 
         shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -84,6 +86,76 @@ public class TestAuto extends LinearOpMode {
             resetEncValues();
             */
 
+            closeWrist();
+
+            setTargetPos(-350, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            moveForward();
+
+            while (m1.isBusy()) {
+                telemetry.addData("Status", "Moving Forward");
+                telemetry.update();
+            }
+
+            stopBot();
+            sleep(1500);
+
+            //-1200 for first zone
+            //-1800 for zone b
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-2100, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            moveForward();
+
+            while (m1.isBusy()) {
+                telemetry.addData("Drive Encoder", m1.getCurrentPosition());
+                telemetry.update();
+            }
+
+            stopBot();
+            sleep(1500);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-100, false, false);
+            m1.setTargetPosition(100);
+            m2.setTargetPosition(100);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            m1.setPower(.5);
+            m2.setPower(.5);
+            m3.setPower(.5);
+            m4.setPower(.5);
+
+            while (m1.isBusy()) {
+                telemetry.addData("Encoder value turned", m1.getCurrentPosition());
+                telemetry.update();
+            }
+
+            openWrist();
+            stopBot();
+
+            /*
+            sleep(1500);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-300, true, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            m1.setPower(.5);
+            m2.setPower(.5);
+            m3.setPower(.5);
+            m4.setPower(.5);
+
+            while (m1.isBusy()) {
+                telemetry.addData("Status", m1.getCurrentPosition());
+                telemetry.update();
+            }
+
+            stopBot();
+
+             */
+
+            //shootDisc2();
+
+
             /*
             setTargetPos(-800, true, false);
             strafeRight();
@@ -97,6 +169,7 @@ public class TestAuto extends LinearOpMode {
 */
             //Move to starting position
 
+            /*
             setTargetPos(-550, true, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             testMove();
@@ -110,7 +183,7 @@ public class TestAuto extends LinearOpMode {
             }
 
            stopBot();
-
+*/
 /*
             stopBot();
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -358,7 +431,7 @@ public class TestAuto extends LinearOpMode {
     }
 
     void shootDisc() {
-        shooter.setVelocity(1675);
+        shooter.setVelocity(1650);
         sleep(1000);
         while (shooter.isMotorEnabled()) {
             hopper.setPower(1);
@@ -370,6 +443,26 @@ public class TestAuto extends LinearOpMode {
         shooter.setMotorEnable();
         shooter.setPower(0);
         hopper.setPower(0);
+    }
+
+    void shootDisc2() {
+        shooter.setVelocity(1650);
+        while (shooter.isMotorEnabled()) {
+            hopper.setPower(.5);
+            sleep(6000);
+            shooter.setMotorDisable();
+        }
+        shooter.setMotorEnable();
+        shooter.setPower(0);
+        hopper.setPower(0);
+    }
+
+    void openWrist() {
+        wristServoAuto.setPosition(0);
+    }
+
+    void closeWrist() {
+        wristServoAuto.setPosition(.5);
     }
 
     void testMove() {

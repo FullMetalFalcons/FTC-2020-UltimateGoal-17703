@@ -54,14 +54,14 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@TeleOp(name = "Just Vision", group = "FMF")
+@TeleOp(name = "Aidan's Match 2 Enc Nav", group = "FMF")
 //@Disabled
 public class Match2TestAuto extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
-    Servo wristServo, newWristLeft, newWristRight;
+    Servo wristServo, wristServoAuto;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
     double currentHeading;
     double originalHeading;
@@ -126,9 +126,7 @@ public class Match2TestAuto extends LinearOpMode {
         wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         wristServo = hardwareMap.servo.get("hand_servo");
-        newWristLeft = hardwareMap.servo.get("left_wrist_servo");
-        newWristRight = hardwareMap.servo.get("right_wrist_servo");
-        newWristRight.setDirection(Servo.Direction.REVERSE);
+        wristServoAuto = hardwareMap.servo.get("hand_servo_auto");
 
         shooter = (DcMotorEx) hardwareMap.dcMotor.get("shooter_motor");
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -171,7 +169,20 @@ public class Match2TestAuto extends LinearOpMode {
             telemetry.addData("Robot Status", "Securing the Wobble");
             telemetry.update();
             sleep(100);
-            //wristServoAuto.setPosition(0.5);
+            closeWrist();
+
+            setTargetPos(-350, false, false, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            moveForward();
+
+            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backRightMotor.isBusy() && backLeftMotor.isBusy()) {
+                telemetry.addData("Status", "Moving Forward to Vision Zone");
+                telemetry.update();
+            }
+
+            stopBot();
+            sleep(1500);
+
 
             if (opModeIsActive()) {
                 if (tfod != null) {
@@ -179,12 +190,50 @@ public class Match2TestAuto extends LinearOpMode {
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
+                        //May need to delete this next line but this should hopefully do a second check for vision to make sure everything works
+                        updatedRecognitions = tfod.getUpdatedRecognitions();
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
                         if (updatedRecognitions.size() == 0) {
                             // empty list.  no objects recognized.
+
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
 
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(-1200, false, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            moveForward();
+
+                            while (frontRightMotor.isBusy() && frontLeftMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                telemetry.addData("Status", "Moving to Target Zone A");
+                                telemetry.update();
+                            }
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(-100, false, false, true, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            turnLeft();
+
+                            while (frontRightMotor.isBusy() && frontLeftMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                telemetry.addData("Status", "Turning Left into Target Zone");
+                                telemetry.update();
+                            }
+
+                            openWrist();
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(100, false, false, false, true);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            turnLeft();
+
+                            while (frontRightMotor.isBusy() && frontLeftMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                telemetry.addData("Status", "Turning Right to Return to Original Heading");
+                                telemetry.update();
+                            }
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            stopBot();
+
+                            /*
                             //Move forward to Target Zone A drop area
                             setTargetPos((int) (2.6*tileForward), false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -229,7 +278,7 @@ public class Match2TestAuto extends LinearOpMode {
                             sleep(200);
 
                             stopBot();
-
+*/
 
                         } else {
                             // step through the list of recognitions and display boundary info.
@@ -537,17 +586,15 @@ public class Match2TestAuto extends LinearOpMode {
     }
 
     void openWrist() {
-        newWristLeft.setPosition(.5);
-        newWristRight.setPosition(.5);
+        wristServoAuto.setPosition(0);
     }
 
     void closeWrist() {
-        newWristRight.setPosition(0);
-        newWristLeft.setPosition(0);
+        wristServoAuto.setPosition(.5);
     }
 
     void shootDisc() {
-        shooter.setVelocity(1675);
+        shooter.setVelocity(1750);
         sleep(1000);
         while (shooter.isMotorEnabled()) {
             hopper.setPower(1);
@@ -563,7 +610,7 @@ public class Match2TestAuto extends LinearOpMode {
 
 
     void returnStartOrientation() {
-        
+
         while (currentHeading != originalHeading) {
             if (currentHeading < 0) {
                 turnRight();
