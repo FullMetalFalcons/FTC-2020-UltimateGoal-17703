@@ -86,6 +86,9 @@ public class TestAuto extends LinearOpMode {
             resetEncValues();
             */
 
+
+
+
             closeWrist();
 
             setTargetPos(-350, false, false);
@@ -102,8 +105,9 @@ public class TestAuto extends LinearOpMode {
 
             //-1200 for first zone
             //-1800 for zone b
+            //-3000 for zone c
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            setTargetPos(-2100, false, false);
+            setTargetPos(-3000, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveForward();
 
@@ -132,8 +136,91 @@ public class TestAuto extends LinearOpMode {
 
             openWrist();
             stopBot();
+            sleep(1500);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-100, false, false);
+            m3.setTargetPosition(100);
+            m4.setTargetPosition(100);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            m1.setPower(.5);
+            m2.setPower(.5);
+            m3.setPower(.5);
+            m4.setPower(.5);
+
+            while (m1.isBusy()) {
+                telemetry.addData("Encoder value turned", m1.getCurrentPosition());
+                telemetry.update();
+            }
+
+            stopBot();
+            sleep(500);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(1100, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            moveBackward();
+
+            while (m1.isBusy()) {
+                telemetry.addData("Status", "Moving Backward");
+                telemetry.update();
+            }
+
+            stopBot();
+            sleep(1500);
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-600, true, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            strafeRight();
+
+            while (m1.isBusy()) {
+                telemetry.addData("Status", "Strafing");
+                telemetry.update();
+            }
+
+            stopBot();
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-130, false, false);
+            m1.setTargetPosition(130);
+            m2.setTargetPosition(130);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            m1.setPower(.5);
+            m2.setPower(.5);
+            m3.setPower(.5);
+            m4.setPower(.5);
+
+            while (m1.isBusy()) {
+                telemetry.addData("Encoder value turned", m1.getCurrentPosition());
+                telemetry.update();
+            }
+
+            stopBot();
+            sleep(500);
+
+            shootDisc2();
+
+            while (shooter.isBusy()) {
+                telemetry.addData("Status", "Shooting");
+                telemetry.update();
+            }
+
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-300, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            moveForward();
+
+            while (m1.isBusy()) {
+                telemetry.addData("Status", "Parking");
+                telemetry.update();
+            }
+
+            stopBot();
+
 
             /*
+
             sleep(1500);
 
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -151,7 +238,7 @@ public class TestAuto extends LinearOpMode {
 
             stopBot();
 
-             */
+*/
 
             //shootDisc2();
 
@@ -431,7 +518,7 @@ public class TestAuto extends LinearOpMode {
     }
 
     void shootDisc() {
-        shooter.setVelocity(1650);
+        shooter.setVelocity(1500);
         sleep(1000);
         while (shooter.isMotorEnabled()) {
             hopper.setPower(1);
@@ -446,7 +533,7 @@ public class TestAuto extends LinearOpMode {
     }
 
     void shootDisc2() {
-        shooter.setVelocity(1650);
+        shooter.setVelocity(1550);
         while (shooter.isMotorEnabled()) {
             hopper.setPower(.5);
             sleep(6000);
