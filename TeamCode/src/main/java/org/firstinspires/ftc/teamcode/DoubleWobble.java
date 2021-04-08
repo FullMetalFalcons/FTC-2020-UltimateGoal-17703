@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -39,6 +40,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
@@ -55,9 +60,9 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@Autonomous(name = "Aidan's Match 2 Enc Nav", group = "FMF")
+@Autonomous(name = "Double Wobble", group = "FMF")
 //@Disabled
-public class Match2TestAuto extends LinearOpMode {
+public class DoubleWobble extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
@@ -68,6 +73,7 @@ public class Match2TestAuto extends LinearOpMode {
     double originalHeading;
     int tileForward;
     int tileStrafeRight;
+    BNO055IMU imu;
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -137,6 +143,12 @@ public class Match2TestAuto extends LinearOpMode {
         intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
         //intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(new BNO055IMU.Parameters());
+
+        Orientation orientation;
+        double initialHeading;
+
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
         initVuforia();
@@ -167,6 +179,8 @@ public class Match2TestAuto extends LinearOpMode {
 
         if (opModeIsActive()) {
 
+            initialHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+
             telemetry.addData("Robot Status", "Securing the Wobble");
             telemetry.update();
             sleep(100);
@@ -192,7 +206,7 @@ public class Match2TestAuto extends LinearOpMode {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
                         //May need to delete this next line but this should hopefully do a second check for vision to make sure everything works
-                       // updatedRecognitions = tfod.getUpdatedRecognitions();
+                        // updatedRecognitions = tfod.getUpdatedRecognitions();
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
                         if (updatedRecognitions.size() == 0) {
                             // empty list.  no objects recognized.
@@ -229,21 +243,20 @@ public class Match2TestAuto extends LinearOpMode {
                             openWrist();
                             sleep(1500);
 
-                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-130, false, false, true, false);
-                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             turnRight();
-
-                            while (frontLeftMotor.isBusy()) {
-                                telemetry.addData("Encoder value turned", frontLeftMotor.getCurrentPosition());
+                            while (opModeIsActive()) {
+                                orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                                telemetry.addData("Heading", orientation.firstAngle);
                                 telemetry.update();
+                                if (orientation.firstAngle <= initialHeading) break;
                             }
 
                             stopBot();
                             sleep(500);
 
                             //Robot strafes to the area it will shoot from
-                            setTargetPos(-900, true, false, false, false);
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(-600, true, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             strafeRight();
 
@@ -255,34 +268,19 @@ public class Match2TestAuto extends LinearOpMode {
                             stopBot();
                             sleep(1500);
 
-
-                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-50, false, false, false, true);
-                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            //Turn left to shoot
                             turnLeft();
-
-                            while (frontLeftMotor.isBusy()) {
-                                telemetry.addData("Status", "Turning Left to make sure it lines up with shooter");
+                            while (opModeIsActive()) {
+                                orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                                telemetry.addData("Heading", orientation.firstAngle);
+                                telemetry.addData("Status", "Turning to Position to Shoot From");
                                 telemetry.update();
+                                //This angle is subject to change based on testing
+                                if (orientation.firstAngle >= 12) break;
                             }
 
                             stopBot();
-
-
-                            //Shoot2
-
-                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-150, false, false, false, false);
-                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            moveForward();
-
-                            while (frontLeftMotor.isBusy()) {
-                                telemetry.addData("Status", "Parking");
-                                telemetry.update();
-                            }
-
-                            stopBot();
-                            sleep(1000);
+                            sleep(200);
                             shootDisc2();
 
                             while (shooter.isBusy()) {
@@ -291,7 +289,7 @@ public class Match2TestAuto extends LinearOpMode {
                             }
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-250, false, false, false, false);
+                            setTargetPos(-300, false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             moveForward();
 
@@ -299,6 +297,8 @@ public class Match2TestAuto extends LinearOpMode {
                                 telemetry.addData("Status", "Parking");
                                 telemetry.update();
                             }
+
+                            stopBot();
 
 
 
@@ -419,19 +419,14 @@ public class Match2TestAuto extends LinearOpMode {
                                     stopBot();
                                     sleep(1500);
 
-
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-75, false, false, true, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    turnRight();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Strafing Right to Shoot");
+                                    //Turn right to shoot discs
+                                    while (opModeIsActive()) {
+                                        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                                        telemetry.addData("Heading", orientation.firstAngle);
                                         telemetry.update();
+                                        //Angle is subject to change based on testing
+                                        if (orientation.firstAngle >= 4) break;
                                     }
-
-
                                     stopBot();
                                     sleep(500);
                                     shootDisc2();
@@ -454,7 +449,7 @@ public class Match2TestAuto extends LinearOpMode {
                                     sleep(500);
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-800, false, false, false, false);
+                                    setTargetPos(-1000, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveForward();
 
@@ -537,21 +532,19 @@ public class Match2TestAuto extends LinearOpMode {
                                     stopBot();
                                     sleep(1500);
 
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-100, false, false, true, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     turnRight();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Encoder value turned", frontLeftMotor.getCurrentPosition());
+                                    while (opModeIsActive()) {
+                                        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                                        telemetry.addData("Heading", orientation.firstAngle);
                                         telemetry.update();
+                                        if (orientation.firstAngle <= initialHeading) break;
                                     }
 
                                     stopBot();
                                     sleep(500);
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(1400, false, false, false, false);
+                                    setTargetPos(1200, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveBackward();
 
@@ -564,7 +557,7 @@ public class Match2TestAuto extends LinearOpMode {
                                     sleep(1500);
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-900, true, false, false, false);
+                                    setTargetPos(-600, true, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     strafeRight();
 
@@ -575,31 +568,17 @@ public class Match2TestAuto extends LinearOpMode {
 
                                     stopBot();
 
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-70, false, false, false, true);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     turnLeft();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Encoder value turned", frontLeftMotor.getCurrentPosition());
+                                    while (opModeIsActive()) {
+                                        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                                        telemetry.addData("Heading", orientation.firstAngle);
                                         telemetry.update();
+                                        //Angle subject to change based on testing
+                                        if (orientation.firstAngle >= 13) break;
                                     }
 
                                     stopBot();
                                     sleep(500);
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-200, false, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveForward();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Parking");
-                                        telemetry.update();
-                                    }
-
-                                    stopBot();
-                                    sleep(1000);
 
                                     shootDisc2();
 
@@ -671,16 +650,16 @@ public class Match2TestAuto extends LinearOpMode {
                                 }
                             }
                         }
-                                    telemetry.update();
-                                }
-                            }
-                        }
-                    }
-
-                    if (tfod != null) {
-                        tfod.shutdown();
+                        telemetry.update();
                     }
                 }
+            }
+        }
+
+        if (tfod != null) {
+            tfod.shutdown();
+        }
+    }
 
 
     /**
@@ -876,11 +855,9 @@ public class Match2TestAuto extends LinearOpMode {
     }
 
     void shootDisc2() {
-        shooter.setVelocity(1500);
-
+        shooter.setVelocity(1450);
         while (shooter.isMotorEnabled()) {
-            sleep(1000);
-            hopper.setPower(1);
+            hopper.setPower(.5);
             sleep(6000);
             shooter.setMotorDisable();
         }
