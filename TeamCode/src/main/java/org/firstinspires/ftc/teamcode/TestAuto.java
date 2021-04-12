@@ -88,8 +88,9 @@ public class TestAuto extends LinearOpMode {
             */
 
 
+            shootRingV3();
 
-
+/*
             closeWrist();
 
             setTargetPos(-350, false, false);
@@ -218,6 +219,8 @@ public class TestAuto extends LinearOpMode {
             }
 
             stopBot();
+
+ */
 
 
             /*
@@ -558,6 +561,19 @@ public class TestAuto extends LinearOpMode {
         m2.setPower(.5);
         m3.setPower(.5);
         m4.setPower(.5);
+    }
+
+    void shootRingV3() {
+        shooter.setVelocity(1550);
+        while (shooter.isMotorEnabled()) {
+            sleep(1500);
+            hopper.setPower(1);
+            sleep(6000);
+            shooter.setMotorDisable();
+        }
+        shooter.setMotorEnable();
+        shooter.setPower(0);
+        hopper.setPower(0);
     }
 
 }

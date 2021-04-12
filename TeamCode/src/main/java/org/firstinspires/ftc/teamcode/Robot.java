@@ -133,7 +133,9 @@ public class Robot extends LinearOpMode {
             }
 
             if (gamepad2.y) {
-                shooter.setVelocity(1650);
+                shooter.setVelocity(1625);
+            } else if (gamepad2.a) {
+                shooter.setVelocity(1400);
             } else {
                 shooter.setPower(0);
             }

@@ -157,7 +157,7 @@ public class Match2TestAuto extends LinearOpMode {
             // (typically 1.78 or 16/9).
 
             // Uncomment the following line if you want to adjust the magnification and/or the aspect ratio of the input images.
-            //tfod.setZoom(2.5, 1.78);
+            tfod.setZoom(2.5, 1.78);
         }
 
         /** Wait for the game to begin */
@@ -172,7 +172,9 @@ public class Match2TestAuto extends LinearOpMode {
             sleep(100);
             closeWrist();
 
-            setTargetPos(-350, false, false, false, false);
+            //-350
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-400, false, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveForward();
 
@@ -182,7 +184,7 @@ public class Match2TestAuto extends LinearOpMode {
             }
 
             stopBot();
-            sleep(1500);
+            sleep(1700);
 
 
             if (opModeIsActive()) {
@@ -200,6 +202,7 @@ public class Match2TestAuto extends LinearOpMode {
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
 
+                            //-1400
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                             setTargetPos(-1400, false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -213,6 +216,7 @@ public class Match2TestAuto extends LinearOpMode {
                             stopBot();
                             sleep(300);
 
+                            //-130
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                             setTargetPos(-130, false, false, false, true);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -243,7 +247,8 @@ public class Match2TestAuto extends LinearOpMode {
                             sleep(500);
 
                             //Robot strafes to the area it will shoot from
-                            setTargetPos(-900, true, false, false, false);
+                            //-900
+                            setTargetPos(-1000, true, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             strafeRight();
 
@@ -256,8 +261,9 @@ public class Match2TestAuto extends LinearOpMode {
                             sleep(1500);
 
 
+                            //-50
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-50, false, false, false, true);
+                            setTargetPos(-35, false, false, false, true);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             turnLeft();
 
@@ -272,7 +278,7 @@ public class Match2TestAuto extends LinearOpMode {
                             //Shoot2
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-150, false, false, false, false);
+                            setTargetPos(-250, false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             moveForward();
 
@@ -291,7 +297,7 @@ public class Match2TestAuto extends LinearOpMode {
                             }
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-250, false, false, false, false);
+                            setTargetPos(-450, false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             moveForward();
 
@@ -421,8 +427,9 @@ public class Match2TestAuto extends LinearOpMode {
 
 
 
+                                    //-85
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-75, false, false, true, false);
+                                    setTargetPos(-90, false, false, true, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     turnRight();
 
@@ -468,7 +475,7 @@ public class Match2TestAuto extends LinearOpMode {
                                     openWrist();
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(500, false, false, false, false);
+                                    setTargetPos(300, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveBackward();
 
@@ -521,7 +528,7 @@ public class Match2TestAuto extends LinearOpMode {
                                     }
 
                                     stopBot();
-                                    sleep(1500);
+                                    sleep(1000);
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                                     setTargetPos(-100, false, false, false, true);
@@ -550,6 +557,7 @@ public class Match2TestAuto extends LinearOpMode {
                                     stopBot();
                                     sleep(500);
 
+                                    //1400
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                                     setTargetPos(1400, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -575,8 +583,9 @@ public class Match2TestAuto extends LinearOpMode {
 
                                     stopBot();
 
+                                    //-70
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-70, false, false, false, true);
+                                    setTargetPos(-55, false, false, false, true);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     turnLeft();
 
@@ -588,6 +597,7 @@ public class Match2TestAuto extends LinearOpMode {
                                     stopBot();
                                     sleep(500);
 
+                                    //-200
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                                     setTargetPos(-200, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -876,12 +886,11 @@ public class Match2TestAuto extends LinearOpMode {
     }
 
     void shootDisc2() {
-        shooter.setVelocity(1500);
-
+        shooter.setVelocity(1550);
         while (shooter.isMotorEnabled()) {
-            sleep(1000);
+            sleep(1500);
             hopper.setPower(1);
-            sleep(6000);
+            sleep(5500);
             shooter.setMotorDisable();
         }
         shooter.setMotorEnable();
