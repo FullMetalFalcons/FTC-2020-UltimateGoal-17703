@@ -151,6 +151,146 @@ public class Robot extends LinearOpMode {
                 intake.setPower(0);
             }
 
+            if (gamepad1.x) {
+                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setTargetPos(-50, false, false, false, true);
+                setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                turnLeft();
+
+                while (frontLeftMotor.isBusy()) {
+                    telemetry.update();
+                }
+
+                stopBot();
+                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            } else if (gamepad1.b) {
+                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setTargetPos(-50, false, false, true, false);
+                setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                turnRight();
+
+                while (frontLeftMotor.isBusy()) {
+                    telemetry.update();
+                }
+
+                stopBot();
+                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            } else {
+                frontLeftMotor.setPower(0);
+                frontRightMotor.setPower(0);
+                backLeftMotor.setPower(0);
+                backRightMotor.setPower(0);
+            }
+
         }
+    }
+
+    void setPower(float powerStrafe, float powerForward, float powerTurn) {
+        double p1 = -powerStrafe + powerForward - powerTurn;
+        double p2 = powerStrafe + powerForward - powerTurn;
+        double p3 = -powerStrafe + powerForward + powerTurn;
+        double p4 = powerStrafe + powerForward + powerTurn;
+        double max = Math.max(1.0, Math.abs(p1));
+        max = Math.max(max, Math.abs(p2));
+        max = Math.max(max, Math.abs(p3));
+        max = Math.max(max, Math.abs(p4));
+        p1 /= max;
+        p2 /= max;
+        p3 /= max;
+        p4 /= max;
+        backLeftMotor.setPower(p1);
+        frontLeftMotor.setPower(p2);
+        frontRightMotor.setPower(p3);
+        backRightMotor.setPower(p4);
+    }
+
+    private void stopBot() {
+        backLeftMotor.setPower(0);
+        frontLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backRightMotor.setPower(0);
+    }
+
+    void resetEnc() {
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    void moveForward() {
+        setPower(0, -.3f, 0);
+    }
+
+    void moveBackward() {
+        setPower(0, .3f, 0);
+    }
+
+    void strafeLeft() {
+        setPower(.3f, 0, 0);
+    }
+
+    void strafeRight() {
+        setPower(-.3f, 0, 0);
+    }
+
+    void turnLeft() {
+        setPower(0, 0, -.3f);
+    }
+
+    void turnRight() {
+        setPower(0, 0, .3f);
+    }
+
+    void setTargetPos(int encTicks, boolean isStrafingRight, boolean isStrafingLeft, boolean isTurningRight, boolean isTurningLeft) {
+        int pos1 = encTicks;
+        int pos2 = encTicks;
+        int pos3 = encTicks;
+        int pos4 = encTicks;
+        //In Android Studio this would be for strafing right
+        if (isStrafingRight == true) {
+            pos1 = -encTicks;
+            pos2 = encTicks;
+            pos3 = -encTicks;
+            pos4 = encTicks;
+        }
+        //In Android Studio this would be for strafing left
+        if (isStrafingLeft == true) {
+            pos1 = encTicks;
+            pos2 = -encTicks;
+            pos3 = encTicks;
+            pos4 = -encTicks;
+        }
+        if (isTurningRight == true) {
+            pos1 = encTicks;
+            pos2 = encTicks;
+            pos3 = -encTicks;
+            pos4 = -encTicks;
+        }
+        if (isTurningLeft) {
+            pos1 = -encTicks;
+            pos2 = -encTicks;
+            pos3 = encTicks;
+            pos4 = encTicks;
+        }
+        backLeftMotor.setTargetPosition(pos1);
+        frontLeftMotor.setTargetPosition(pos2);
+        frontRightMotor.setTargetPosition(pos3);
+        backRightMotor.setTargetPosition(pos4);
+    }
+
+    void setMode(DcMotor.RunMode mode) {
+        frontRightMotor.setMode(mode);
+        frontLeftMotor.setMode(mode);
+        backRightMotor.setMode(mode);
+        backLeftMotor.setMode(mode);
     }
 }

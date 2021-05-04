@@ -885,6 +885,7 @@ public class Match2TestAuto extends LinearOpMode {
         hopper.setPower(0);
     }
 
+    //The code we actually use to shoot
     void shootDisc2() {
         shooter.setVelocity(1550);
         while (shooter.isMotorEnabled()) {
