@@ -88,8 +88,22 @@ public class TestAuto extends LinearOpMode {
             */
 
 
-            shootRingV3();
+            //shootRingV3();
 
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-500, false, false);
+            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            m1.setPower(.5);
+            m2.setPower(.5);
+            m3.setPower(.5);
+            m4.setPower(.5);
+
+            while (m1.isBusy()) {
+                telemetry.addData("Status", "Forward");
+                telemetry.update();
+            }
+
+            stopBot();
 /*
             closeWrist();
 
@@ -574,6 +588,28 @@ public class TestAuto extends LinearOpMode {
         shooter.setMotorEnable();
         shooter.setPower(0);
         hopper.setPower(0);
+    }
+
+
+    void upSpeed(double finalPower, double encTicks) {
+        double initPower = .2;
+        m1.setPower(initPower);
+        m2.setPower(initPower);
+        m3.setPower(initPower);
+        m4.setPower(initPower);
+        for (int i = 0; i < 3; i++) {
+            while (m1.getCurrentPosition() <= ((i+1)*.1)*encTicks) {
+                setMotorPower(initPower + .1*(i+1));
+            }
+        }
+        stopBot();
+    }
+
+    void setMotorPower(double power) {
+        m1.setPower(power);
+        m2.setPower(power);
+        m3.setPower(power);
+        m4.setPower(power);
     }
 
 }

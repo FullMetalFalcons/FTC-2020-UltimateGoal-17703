@@ -52,7 +52,39 @@ public class Robot extends LinearOpMode {
             telemetry.addData("Wobble Encoder Value", wobbleMotor.getCurrentPosition());
             telemetry.addData("Drive Base Encoders", backLeftMotor.getCurrentPosition());
             telemetry.addData("Shooter Velocity", shooter.getVelocity());
+            telemetry.addData("Front Right Power", frontLeftMotor.getPower());
+            telemetry.addData("Front Left Power", frontLeftMotor.getPower());
+            telemetry.addData("Back Right Power", backRightMotor.getPower());
+            telemetry.addData("Back Left Power", backLeftMotor.getPower());
             telemetry.update();
+
+            if (gamepad1.x) {
+                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setTargetPos(-50, false, false, false, true);
+                setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                turnLeft();
+
+                while (frontLeftMotor.isBusy()) {
+                    telemetry.update();
+                }
+
+                stopBot();
+                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            } else if (gamepad1.b) {
+                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setTargetPos(-50, false, false, true, false);
+                setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                turnRight();
+
+                while (frontLeftMotor.isBusy()) {
+                    telemetry.update();
+                }
+
+                stopBot();
+                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
 
             double powerStrafe = -gamepad1.left_stick_x;
             if (Math.abs(powerStrafe) < 0.05) powerStrafe = 0;
@@ -74,10 +106,11 @@ public class Robot extends LinearOpMode {
                 p2 /= max;
                 p3 /= max;
                 p4 /= max;
-                backLeftMotor.setPower(p1 * .2);
-                frontLeftMotor.setPower(p2 * .2);
-                frontRightMotor.setPower(p3 * .2);
-                backRightMotor.setPower(p4 * .2);
+                backLeftMotor.setPower(p1 * .3);
+                frontLeftMotor.setPower(p2 * .3);
+                frontRightMotor.setPower(p3 * .3);
+                backRightMotor.setPower(p4 * .3);
+                //.2
             } else if (gamepad1.right_trigger > .05) {
                 double p1 = -powerStrafe + powerForward - powerTurn;
                 double p2 = powerStrafe + powerForward - powerTurn;
@@ -95,6 +128,7 @@ public class Robot extends LinearOpMode {
                 frontLeftMotor.setPower(p2 * .4);
                 frontRightMotor.setPower(p3 * .4);
                 backRightMotor.setPower(p4 * .4);
+                //.4
             } else {
                 //Allows the robot to move
                 double p1 = -powerStrafe + powerForward - powerTurn;
@@ -109,10 +143,10 @@ public class Robot extends LinearOpMode {
                 p2 /= max;
                 p3 /= max;
                 p4 /= max;
-                backLeftMotor.setPower(p1 * .8);
-                frontLeftMotor.setPower(p2 * .8);
-                frontRightMotor.setPower(p3 * .8);
-                backRightMotor.setPower(p4 * .8);
+                backLeftMotor.setPower(p1 * .7);
+                frontLeftMotor.setPower(p2 * .7);
+                frontRightMotor.setPower(p3 * .7);
+                backRightMotor.setPower(p4 * .7);
             }
 
 
@@ -151,38 +185,6 @@ public class Robot extends LinearOpMode {
                 intake.setPower(0);
             }
 
-            if (gamepad1.x) {
-                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                setTargetPos(-50, false, false, false, true);
-                setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                turnLeft();
-
-                while (frontLeftMotor.isBusy()) {
-                    telemetry.update();
-                }
-
-                stopBot();
-                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            } else if (gamepad1.b) {
-                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                setTargetPos(-50, false, false, true, false);
-                setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                turnRight();
-
-                while (frontLeftMotor.isBusy()) {
-                    telemetry.update();
-                }
-
-                stopBot();
-                setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            } else {
-                frontLeftMotor.setPower(0);
-                frontRightMotor.setPower(0);
-                backLeftMotor.setPower(0);
-                backRightMotor.setPower(0);
-            }
 
         }
     }
