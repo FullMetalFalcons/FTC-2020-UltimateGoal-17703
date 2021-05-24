@@ -163,14 +163,19 @@ public class Match3TestAuto extends LinearOpMode {
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
+
+        sleep(100);
+        closeWrist();
+
         waitForStart();
+
 
         if (opModeIsActive()) {
 
             telemetry.addData("Robot Status", "Securing the Wobble");
             telemetry.update();
             sleep(100);
-            closeWrist();
+            //closeWrist();
 
             //-350
             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -248,9 +253,10 @@ public class Match3TestAuto extends LinearOpMode {
                             sleep(500);
 
                             //Turn right to shoot
-                            setTargetPos(-100, false, false, true, false);
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(-110, false, false, true, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            strafeRight();
+                            turnRight();
 
                             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
                                 telemetry.addData("Status", "Strafing to Shooting Position");
@@ -259,7 +265,7 @@ public class Match3TestAuto extends LinearOpMode {
 
                             stopBot();
                             sleep(1500);
-
+/*
                             //Move forward to get in range to shoot
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                             setTargetPos(-150, false, false, false, false);
@@ -273,12 +279,27 @@ public class Match3TestAuto extends LinearOpMode {
 
                             stopBot();
                             sleep(1000);
+
+ */
                             shootDisc2();
+                            //May need to move back bc it may hit wobble goal as it shoots rings
 
                             while (shooter.isBusy()) {
                                 telemetry.addData("Status", "Shooting");
                                 telemetry.update();
                             }
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(-400, true, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            strafeRight();
+
+                            while (frontLeftMotor.isBusy()) {
+
+                            }
+
+                            stopBot();
+                            sleep(1000);
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                             setTargetPos(-450, false, false, false, false);
@@ -327,7 +348,7 @@ public class Match3TestAuto extends LinearOpMode {
 
                                     //-85
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-90, false, false, true, false);
+                                    setTargetPos(-105, false, false, true, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     turnRight();
 
@@ -384,7 +405,6 @@ public class Match3TestAuto extends LinearOpMode {
 
                                     stopBot();
 
-                                    stopBot();
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
@@ -395,105 +415,74 @@ public class Match3TestAuto extends LinearOpMode {
                                     //-1800 for zone b
                                     //-3000 for zone c
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-3000, false, false, false, false);
+                                    setTargetPos(-1400, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveForward();
+                                    setMotorPower(.3f);
 
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Drive Encoder", frontLeftMotor.getCurrentPosition());
-                                        telemetry.update();
-                                    }
-
-                                    stopBot();
-                                    sleep(1000);
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-100, false, false, false, true);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    turnLeft();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Encoder value turned", frontLeftMotor.getCurrentPosition());
-                                        telemetry.update();
-                                    }
-
-                                    openWrist();
-                                    stopBot();
-                                    sleep(1500);
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-100, false, false, true, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    turnRight();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Encoder value turned", frontLeftMotor.getCurrentPosition());
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Status", "Moving Forward to Shooting Position");
                                         telemetry.update();
                                     }
 
                                     stopBot();
                                     sleep(500);
-
-                                    //1400
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(1400, false, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveBackward();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Moving Backward");
-                                        telemetry.update();
-                                    }
-
-                                    stopBot();
-                                    sleep(1500);
 
                                     //Turn right to shoot
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-100, false, false, true, false);
+                                    setTargetPos(-130, false, false, true, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     turnRight();
 
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Strafing");
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Status", "Strafing to Shooting Position");
                                         telemetry.update();
                                     }
 
                                     stopBot();
-                                    sleep(500);
-
-                                    //-200
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-200, false, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveForward();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Parking");
-                                        telemetry.update();
-                                    }
-
-                                    stopBot();
-                                    sleep(1000);
+                                    sleep(1500);
 
                                     shootDisc2();
-
 
                                     while (shooter.isBusy()) {
                                         telemetry.addData("Status", "Shooting");
                                         telemetry.update();
                                     }
 
+                                    sleep(500);
+
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-300, false, false, false, false);
+                                    setTargetPos(-130, false, false, false, true);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    turnLeft();
+
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Status", "Strafing to Shooting Position");
+                                        telemetry.update();
+                                    }
+
+                                    stopBot();
+                                    sleep(1500);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(-1500, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveForward();
 
                                     while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Parking");
-                                        telemetry.update();
+
                                     }
 
+                                    openWrist();
+                                    sleep(500);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(900, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveBackward();
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
                                     stopBot();
 
 
@@ -658,7 +647,7 @@ public class Match3TestAuto extends LinearOpMode {
             telemetry.update();
         }
         wobbleMotor.setPower(0);
-        wristServo.setPosition(.3);
+        //wristServo.setPosition(.3);
     }
 
     void raiseWobble() {
@@ -673,7 +662,7 @@ public class Match3TestAuto extends LinearOpMode {
             telemetry.update();
         }
         wobbleMotor.setPower(0);
-        wristServo.setPosition(.9);
+        //wristServo.setPosition(.9);
     }
 
     void setMode(DcMotor.RunMode mode) {
@@ -708,16 +697,33 @@ public class Match3TestAuto extends LinearOpMode {
 
     //The code we actually use to shoot
     void shootDisc2() {
-        shooter.setVelocity(1550);
+        shooter.setVelocity(1625);
         while (shooter.isMotorEnabled()) {
             sleep(1500);
             hopper.setPower(1);
+            intake.setPower(1);
             sleep(5500);
             shooter.setMotorDisable();
         }
         shooter.setMotorEnable();
         shooter.setPower(0);
         hopper.setPower(0);
+        intake.setPower(0);
+    }
+
+    void shootDisc0Stack() {
+        shooter.setVelocity(1600);
+        while (shooter.isMotorEnabled()) {
+            sleep(1500);
+            hopper.setPower(1);
+            intake.setPower(1);
+            sleep(5500);
+            shooter.setMotorDisable();
+        }
+        shooter.setMotorEnable();
+        shooter.setPower(0);
+        hopper.setPower(0);
+        intake.setPower(0);
     }
 
 

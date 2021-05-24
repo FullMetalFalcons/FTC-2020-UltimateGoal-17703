@@ -29,7 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -40,10 +39,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
@@ -60,7 +55,7 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@Autonomous(name = "Double Wobble", group = "FMF")
+@Autonomous(name = "Double Wobble Test", group = "FMF")
 //@Disabled
 public class DoubleWobble extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
@@ -73,7 +68,6 @@ public class DoubleWobble extends LinearOpMode {
     double originalHeading;
     int tileForward;
     int tileStrafeRight;
-    BNO055IMU imu;
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -129,6 +123,7 @@ public class DoubleWobble extends LinearOpMode {
         wobbleMotor = (DcMotorEx) hardwareMap.dcMotor.get("arm_motor");
         //Because we want the wobble motor to only rotate down, the mode will need to run to a certain position (90 degrees = wobbleEncoderMax)
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wobbleMotor.setTargetPosition(0);
         wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -142,12 +137,6 @@ public class DoubleWobble extends LinearOpMode {
 
         intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
         //intake.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(new BNO055IMU.Parameters());
-
-        Orientation orientation;
-        double initialHeading;
 
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
@@ -169,24 +158,28 @@ public class DoubleWobble extends LinearOpMode {
             // (typically 1.78 or 16/9).
 
             // Uncomment the following line if you want to adjust the magnification and/or the aspect ratio of the input images.
-            //tfod.setZoom(2.5, 1.78);
+            tfod.setZoom(2.5, 1.78);
         }
 
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
+
+        sleep(100);
+        closeWrist();
+
         waitForStart();
 
         if (opModeIsActive()) {
-
-            initialHeading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
             telemetry.addData("Robot Status", "Securing the Wobble");
             telemetry.update();
             sleep(100);
             closeWrist();
 
-            setTargetPos(-350, false, false, false, false);
+            //-350
+            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            setTargetPos(-400, false, false, false, false);
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
             moveForward();
 
@@ -196,7 +189,7 @@ public class DoubleWobble extends LinearOpMode {
             }
 
             stopBot();
-            sleep(1500);
+            sleep(1700);
 
 
             if (opModeIsActive()) {
@@ -214,10 +207,11 @@ public class DoubleWobble extends LinearOpMode {
                             telemetry.addData("TFOD", "No items detected.");
                             telemetry.addData("Target Zone", "A");
 
+                            //Move forward to target zone A
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                             setTargetPos(-1400, false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            moveForward();
+                            setMotorPower(.3f);
 
                             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
                                 telemetry.addData("Status", "Moving Forward to Shooting Position");
@@ -225,10 +219,11 @@ public class DoubleWobble extends LinearOpMode {
                             }
 
                             stopBot();
-                            sleep(300);
+                            sleep(500);
 
+                            //Turn left to make sure the wobble goal is in the zone
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-130, false, false, false, true);
+                            setTargetPos(-120, false, false, false, true);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             turnLeft();
 
@@ -238,27 +233,30 @@ public class DoubleWobble extends LinearOpMode {
                             }
 
                             stopBot();
-                            sleep(500);
+                            sleep(100);
 
                             openWrist();
-                            sleep(1500);
+                            sleep(200);
 
+                            //Turns right to reorient the robot so it is centered
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(-125, false, false, true, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             turnRight();
-                            while (opModeIsActive()) {
-                                orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                                telemetry.addData("Heading", orientation.firstAngle);
+
+                            while (frontLeftMotor.isBusy()) {
+                                telemetry.addData("Encoder value turned", frontLeftMotor.getCurrentPosition());
                                 telemetry.update();
-                                if (orientation.firstAngle <= initialHeading) break;
                             }
 
                             stopBot();
                             sleep(500);
 
-                            //Robot strafes to the area it will shoot from
+                            //Turn right to shoot
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-600, true, false, false, false);
+                            setTargetPos(-110, false, false, true, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            strafeRight();
+                            turnRight();
 
                             while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
                                 telemetry.addData("Status", "Strafing to Shooting Position");
@@ -266,22 +264,9 @@ public class DoubleWobble extends LinearOpMode {
                             }
 
                             stopBot();
-                            sleep(1500);
-
-                            //Turn left to shoot
-                            turnLeft();
-                            while (opModeIsActive()) {
-                                orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                                telemetry.addData("Heading", orientation.firstAngle);
-                                telemetry.addData("Status", "Turning to Position to Shoot From");
-                                telemetry.update();
-                                //This angle is subject to change based on testing
-                                if (orientation.firstAngle >= 12) break;
-                            }
-
-                            stopBot();
                             sleep(200);
-                            shootDisc2();
+                            shootDisc0Stack();
+                            //May need to move back bc it may hit wobble goal as it shoots rings
 
                             while (shooter.isBusy()) {
                                 telemetry.addData("Status", "Shooting");
@@ -289,7 +274,75 @@ public class DoubleWobble extends LinearOpMode {
                             }
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-300, false, false, false, false);
+                            setTargetPos(-110, false, false, false, true);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            turnLeft();
+
+                            while (frontLeftMotor.isBusy()) {
+                                telemetry.addData("Status", "Turning to be aligned with 2nd wobble");
+                                telemetry.update();
+                            }
+
+                            stopBot();
+                            sleep(500);
+
+                            //Lower the arm and open wrist here
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(470, false, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            moveBackward();
+
+                            while (frontLeftMotor.isBusy()) {
+                                telemetry.addData("Status", "Moving to 2nd wobble");
+                                telemetry.update();
+                            }
+
+                            stopBot();
+                            sleep(100);
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(-375, false, false, false, true);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            turnLeft();
+
+                            while (frontLeftMotor.isBusy()) {
+                                telemetry.addData("Status", "Turning to align with target zone");
+                                telemetry.update();
+                            }
+
+                            stopBot();
+                            sleep(300);
+                            dropWobble();
+                            openWristWobble2();
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(800, false, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            moveBackward();
+
+                            while (frontLeftMotor.isBusy()) {
+                                telemetry.addData("Status", "Going for 2nd wobble");
+                                telemetry.update();
+                            }
+
+                            stopBot();
+                            sleep(200);
+                            closeWristWobble2();
+                            sleep(300);
+                            //Raise arm and close wrist
+                            //raiseWobble();
+
+                            wobbleMotor.setTargetPosition(-1300);
+                            wobbleMotor.setPower(.2f);
+                            while (wobbleMotor.isBusy()) {
+
+                            }
+                            wobbleMotor.setPower(0);
+                            sleep(100);
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(-700, false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             moveForward();
 
@@ -299,93 +352,55 @@ public class DoubleWobble extends LinearOpMode {
                             }
 
                             stopBot();
-
-
-
-
-
-                            /*
-                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-1200, false, false, false, false);
-                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            moveForward();
-
-                            while (frontRightMotor.isBusy() && frontLeftMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Status", "Moving to Target Zone A");
-                                telemetry.update();
-                            }
+                            sleep(100);
 
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(-100, false, false, true, false);
+                            setTargetPos(-1200, false, false, false, true);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             turnLeft();
 
-                            while (frontRightMotor.isBusy() && frontLeftMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Status", "Turning Left into Target Zone");
-                                telemetry.update();
+                            while (frontLeftMotor.isBusy()) {
+
                             }
 
-                            openWrist();
-                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(100, false, false, false, true);
-                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            turnLeft();
-
-                            while (frontRightMotor.isBusy() && frontLeftMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Status", "Turning Right to Return to Original Heading");
-                                telemetry.update();
-                            }
-
-                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                             stopBot();
-*/
+                            sleep(100);
 
-                            /*
-                            //Move forward to Target Zone A drop area
-                            setTargetPos((int) (2.6*tileForward), false, false, false, false);
-                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            moveForward();
-
-                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Status", "Moving to Target Zone A");
-                                telemetry.update();
-                            }
-
-                            //Resets Encoders and moves back to avoid picking up the wobble again
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            openWrist();
-                            sleep(300);
-                            setTargetPos((int) (-.1*tileForward), false, false, false, false);
+                            setTargetPos(650, false, false, false, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
                             moveBackward();
 
-                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Status", "Moving Back to Avoid Wobble");
-                                telemetry.update();
+                            while (frontLeftMotor.isBusy()) {
+
                             }
 
-                            //Shuts the wrist and strafes right to the shooting area
-                            closeWrist();
+                            stopBot();
+                            openWristWobble2();
+                            sleep(100);
+
                             setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            setTargetPos(tileStrafeRight, true, false, false, false);
+                            setTargetPos(-200, false, false, true, false);
                             setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            strafeRight();
+                            turnRight();
+                            while (frontLeftMotor.isBusy()) {
 
-                            while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                telemetry.addData("Status", "Strafing to Shooting Position");
-                                telemetry.update();
+                            }
+                            stopBot();
+                            sleep(100);
+
+                            setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            setTargetPos(200, false, false, false, false);
+                            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            moveBackward();
+
+                            while (frontLeftMotor.isBusy()) {
+
                             }
 
                             stopBot();
-                            //Shoot the discs
 
-                            //Parks on the line
-                            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                            moveForward();
-                            sleep(200);
 
-                            stopBot();
-*/
 
                         } else {
                             // step through the list of recognitions and display boundary info.
@@ -419,14 +434,20 @@ public class DoubleWobble extends LinearOpMode {
                                     stopBot();
                                     sleep(1500);
 
-                                    //Turn right to shoot discs
-                                    while (opModeIsActive()) {
-                                        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                                        telemetry.addData("Heading", orientation.firstAngle);
+
+
+                                    //-85
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(-105, false, false, true, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    turnRight();
+
+                                    while (frontLeftMotor.isBusy()) {
+                                        telemetry.addData("Status", "Strafing Right to Shoot");
                                         telemetry.update();
-                                        //Angle is subject to change based on testing
-                                        if (orientation.firstAngle >= 4) break;
                                     }
+
+
                                     stopBot();
                                     sleep(500);
                                     shootDisc2();
@@ -449,7 +470,7 @@ public class DoubleWobble extends LinearOpMode {
                                     sleep(500);
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-1000, false, false, false, false);
+                                    setTargetPos(-800, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveForward();
 
@@ -461,11 +482,103 @@ public class DoubleWobble extends LinearOpMode {
                                     stopBot();
                                     sleep(1000);
                                     openWrist();
+                                    sleep(200);
 
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(500, false, false, false, false);
+                                    setTargetPos(-300, false, false, false, true);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    turnLeft();
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
+
+                                    stopBot();
+                                    sleep(200);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(490, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                     moveBackward();
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
+
+                                    stopBot();
+                                    sleep(200);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(-300, false, false, false, true);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    turnLeft();
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
+
+                                    stopBot();
+                                    sleep(200);
+
+                                    dropWobble();
+                                    openWristWobble2();
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(600, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveBackward();
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
+
+                                    stopBot();
+                                    sleep(200);
+                                    closeWristWobble2();
+                                    sleep(200);
+
+                                    wobbleMotor.setTargetPosition(-1400);
+                                    wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    wobbleMotor.setPower(1);
+
+                                    while (wobbleMotor.isBusy()) {
+
+                                    }
+
+                                    wobbleMotor.setPower(0);
+                                    sleep(200);
+
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(-900, false, false, true, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    turnRight();
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
+
+                                    stopBot();
+                                    sleep(200);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(-500, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    setMotorPower(.3f);
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
+
+                                    stopBot();
+                                    sleep(200);
+                                    openWristWobble2();
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(300, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveBackward();
+                                    raiseWobble();
 
                                     while (frontLeftMotor.isBusy()) {
                                         telemetry.addData("Status", "Parking");
@@ -474,28 +587,6 @@ public class DoubleWobble extends LinearOpMode {
 
                                     stopBot();
 
-                                    stopBot();
-
-                                    /*
-                                    //Drops the wobble
-                                    openWrist();
-                                    stopBot();
-                                    sleep(300);
-
-                                    //Moves back to parking zone
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos((int) (-.8*tileForward), false, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveBackward();
-
-                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Status", "Moving to Parking Zone");
-                                        telemetry.update();
-                                    }
-
-                                    closeWrist();
-                                    stopBot();
-*/
 
                                 } else if (recognition.getLabel().equals("Quad")) {
                                     telemetry.addData("Target Zone", "C");
@@ -506,129 +597,23 @@ public class DoubleWobble extends LinearOpMode {
                                     //-1800 for zone b
                                     //-3000 for zone c
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-3000, false, false, false, false);
+                                    setTargetPos(-1400, false, false, false, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveForward();
+                                    setMotorPower(.3f);
 
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Drive Encoder", frontLeftMotor.getCurrentPosition());
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Status", "Moving Forward to Shooting Position");
                                         telemetry.update();
                                     }
 
                                     stopBot();
-                                    sleep(1500);
+                                    sleep(500);
 
+                                    //Turn right to shoot
                                     setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-100, false, false, false, true);
+                                    setTargetPos(-130, false, false, true, false);
                                     setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    turnLeft();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Encoder value turned", frontLeftMotor.getCurrentPosition());
-                                        telemetry.update();
-                                    }
-
-                                    openWrist();
-                                    stopBot();
-                                    sleep(1500);
-
                                     turnRight();
-                                    while (opModeIsActive()) {
-                                        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                                        telemetry.addData("Heading", orientation.firstAngle);
-                                        telemetry.update();
-                                        if (orientation.firstAngle <= initialHeading) break;
-                                    }
-
-                                    stopBot();
-                                    sleep(500);
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(1200, false, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveBackward();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Moving Backward");
-                                        telemetry.update();
-                                    }
-
-                                    stopBot();
-                                    sleep(1500);
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-600, true, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    strafeRight();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Strafing");
-                                        telemetry.update();
-                                    }
-
-                                    stopBot();
-
-                                    turnLeft();
-                                    while (opModeIsActive()) {
-                                        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                                        telemetry.addData("Heading", orientation.firstAngle);
-                                        telemetry.update();
-                                        //Angle subject to change based on testing
-                                        if (orientation.firstAngle >= 13) break;
-                                    }
-
-                                    stopBot();
-                                    sleep(500);
-
-                                    shootDisc2();
-
-
-                                    while (shooter.isBusy()) {
-                                        telemetry.addData("Status", "Shooting");
-                                        telemetry.update();
-                                    }
-
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(-300, false, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveForward();
-
-                                    while (frontLeftMotor.isBusy()) {
-                                        telemetry.addData("Status", "Parking");
-                                        telemetry.update();
-                                    }
-
-                                    stopBot();
-
-                                    /*
-                                    //Moves forward to target zone C
-                                    setTargetPos((int) (4.5*tileForward), false, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveForward();
-
-                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Status", "Moving to Target Zone C");
-                                        telemetry.update();
-                                    }
-
-                                    //Opens the wrist and then moves back until it robot is parallel to shooting position
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    openWrist();
-                                    sleep(300);
-                                    setTargetPos(-2*tileForward, false, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    moveBackward();
-
-                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-                                        telemetry.addData("Status", "Moving Back to Shooting Position");
-                                        telemetry.update();
-                                    }
-
-                                    closeWrist();
-                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                                    setTargetPos(tileStrafeRight, true, false, false, false);
-                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                    strafeRight();
 
                                     while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
                                         telemetry.addData("Status", "Strafing to Shooting Position");
@@ -636,15 +621,53 @@ public class DoubleWobble extends LinearOpMode {
                                     }
 
                                     stopBot();
-                                    //Shoot the discs
+                                    sleep(1500);
 
-                                    //Parks on the line
-                                    setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                                    moveForward();
-                                    sleep(200);
+                                    shootDisc2();
+
+                                    while (shooter.isBusy()) {
+                                        telemetry.addData("Status", "Shooting");
+                                        telemetry.update();
+                                    }
+
+                                    sleep(500);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(-130, false, false, false, true);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    turnLeft();
+
+                                    while (frontLeftMotor.isBusy() && frontRightMotor.isBusy() && backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+                                        telemetry.addData("Status", "Strafing to Shooting Position");
+                                        telemetry.update();
+                                    }
 
                                     stopBot();
-*/
+                                    sleep(1500);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(-1500, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveForward();
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
+
+                                    openWrist();
+                                    sleep(500);
+
+                                    setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                    setTargetPos(900, false, false, false, false);
+                                    setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                    moveBackward();
+
+                                    while (frontLeftMotor.isBusy()) {
+
+                                    }
+                                    stopBot();
+
+
                                 } else {
                                     telemetry.addData("Target Zone", "UNKNOWN");
                                 }
@@ -794,8 +817,8 @@ public class DoubleWobble extends LinearOpMode {
 
     void dropWobble() {
         wobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //Will have to revise this with accurate sign value
-        wobbleMotor.setTargetPosition(-1600);
+        //Had been -1600
+        wobbleMotor.setTargetPosition(-1500);
         wobbleMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         wobbleMotor.setPower(-.15);
 
@@ -806,7 +829,7 @@ public class DoubleWobble extends LinearOpMode {
             telemetry.update();
         }
         wobbleMotor.setPower(0);
-        wristServo.setPosition(.3);
+        //wristServo.setPosition(.3);
     }
 
     void raiseWobble() {
@@ -821,7 +844,7 @@ public class DoubleWobble extends LinearOpMode {
             telemetry.update();
         }
         wobbleMotor.setPower(0);
-        wristServo.setPosition(.9);
+        //wristServo.setPosition(.9);
     }
 
     void setMode(DcMotor.RunMode mode) {
@@ -852,18 +875,23 @@ public class DoubleWobble extends LinearOpMode {
         shooter.setMotorEnable();
         shooter.setPower(0);
         hopper.setPower(0);
+
     }
 
+    //The code we actually use to shoot
     void shootDisc2() {
-        shooter.setVelocity(1450);
+        shooter.setVelocity(1625);
         while (shooter.isMotorEnabled()) {
-            hopper.setPower(.5);
-            sleep(6000);
+            sleep(1500);
+            hopper.setPower(1);
+            intake.setPower(1);
+            sleep(5500);
             shooter.setMotorDisable();
         }
         shooter.setMotorEnable();
         shooter.setPower(0);
         hopper.setPower(0);
+        intake.setPower(0);
     }
 
 
@@ -877,6 +905,36 @@ public class DoubleWobble extends LinearOpMode {
                 turnLeft();
             }
         }
+    }
+
+    void setMotorPower(double power) {
+        frontLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        backRightMotor.setPower(power);
+    }
+
+    void openWristWobble2() {
+        wristServo.setPosition(.8);
+    }
+
+    void closeWristWobble2() {
+        wristServo.setPosition(.1);
+    }
+
+    void shootDisc0Stack() {
+        shooter.setVelocity(1600);
+        while (shooter.isMotorEnabled()) {
+            sleep(1500);
+            hopper.setPower(1);
+            intake.setPower(1);
+            sleep(5500);
+            shooter.setMotorDisable();
+        }
+        shooter.setMotorEnable();
+        shooter.setPower(0);
+        hopper.setPower(0);
+        intake.setPower(0);
     }
 
 }
