@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp (group = "17703", name = "Basic Robot")
@@ -14,6 +15,7 @@ public class Robot extends LinearOpMode {
     Servo wristServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
     private final double SHOOTER_MAX_VELOCITY = 2180;
+    DigitalChannel digitalTouch;
 
     @Override
     public void runOpMode() {
@@ -39,6 +41,9 @@ public class Robot extends LinearOpMode {
 
         intake = (DcMotorEx) hardwareMap.dcMotor.get("intake_motor");
         //intake.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        digitalTouch = hardwareMap.get(DigitalChannel.class, "digital_touch");
+        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
 
         waitForStart();
 
@@ -150,7 +155,7 @@ public class Robot extends LinearOpMode {
             }
 
 
-            if (gamepad2.left_bumper) {
+            if (gamepad2.left_bumper && (digitalTouch.getState() == true)) {
                 wobbleMotor.setPower(.2);
             } else if (gamepad2.right_bumper) {
                 wobbleMotor.setPower(-.2);
