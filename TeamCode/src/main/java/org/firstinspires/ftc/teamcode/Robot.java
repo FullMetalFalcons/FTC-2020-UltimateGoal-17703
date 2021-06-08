@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Robot extends LinearOpMode {
 
     DcMotor backLeftMotor, frontLeftMotor, frontRightMotor, backRightMotor;
-    Servo wristServo;
+    Servo wristServo, hopperServo;
     DcMotorEx wobbleMotor, shooter, hopper, intake;
     private final double SHOOTER_MAX_VELOCITY = 2180;
     DigitalChannel digitalTouch;
@@ -31,6 +31,7 @@ public class Robot extends LinearOpMode {
         wobbleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         wobbleMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        hopperServo = hardwareMap.servo.get("hopper_servo");
 
         wristServo = hardwareMap.servo.get("hand_servo");
 
@@ -161,6 +162,12 @@ public class Robot extends LinearOpMode {
                 wobbleMotor.setPower(-.2);
             } else {
                 wobbleMotor.setPower(0);
+            }
+
+            if (gamepad2.dpad_down) {
+                hopperServo.setPosition(1);
+            } else {
+                hopperServo.setPosition(.3);
             }
 
             /*
